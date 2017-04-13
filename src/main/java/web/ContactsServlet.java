@@ -45,7 +45,8 @@ public class ContactsServlet extends HttpServlet {
                 String firstName = request.getParameter("firstName");
                 String surname = request.getParameter("surname");
                 String primaryEmail = request.getParameter("primaryEmail");
-                LocalDate birthday = LocalDate.parse(request.getParameter("birthday"));
+                String birthdayString = request.getParameter("birthday");
+                LocalDate birthday = birthdayString.equals("") ? null : LocalDate.parse(birthdayString);
 
                 //form data validity check
                 if (firstName == null || firstName.length() == 0 && surname == null || surname.length() == 0) {

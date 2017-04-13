@@ -106,6 +106,19 @@ public class ContactManagerImplTest {
     }
 
     @Test
+    public void createContactWithNullBirthday() {
+        Contact contact = sample_house_builder().birthday(null).build();
+        contactManager.createContact(contact);
+
+        Long contactID = contact.getID();
+        assertThat(contactID).isNotNull();
+
+        assertThat(contactManager.getContact(contactID))
+                .isNotSameAs(contact)
+                .isEqualToComparingFieldByField(contact);
+    }
+
+    @Test
     public void createContactWithID() {
         assertThatThrownBy(() -> contactManager.createContact(contactWithID))
                 .isInstanceOf(IllegalEntityException.class);

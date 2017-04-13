@@ -252,7 +252,7 @@ public class ContactManagerImpl implements ContactManager {
 		}
 
 		LocalDate today = LocalDate.now(clock);
-		if (contact.getBirthday().isAfter(today)) {
+		if (contact.getBirthday() != null && contact.getBirthday().isAfter(today)) {
 			throw new ValidationException("Birthday is in future");
 		}
 	}

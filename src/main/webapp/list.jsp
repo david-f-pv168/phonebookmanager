@@ -18,8 +18,8 @@
             <td><c:out value="${contact.surname}"/></td>
             <td><c:out value="${contact.primaryEmail}"/></td>
             <td><c:out value="${contact.birthday}"/></td>
-            <td><form method="post" action="${pageContext.request.contextPath}/books/delete?id=${contact.id}"
-                      style="margin-bottom: 0;"><input type="submit" value="Smazat"></form></td>
+            <td><form method="post" action="${pageContext.request.contextPath}/contacts/delete?id=${contact.ID}"
+                      style="margin-bottom: 0;"><input type="submit" value="Delete"></form></td>
         </tr>
     </c:forEach>
 </table>

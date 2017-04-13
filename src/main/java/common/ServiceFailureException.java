@@ -19,16 +19,6 @@ public class ServiceFailureException extends RuntimeException {
 
     /**
      * Creates new instance of ServiceFailureException with
-     * the specified cause.
-     *
-     * @param cause: the cause message.
-     */
-    public ServiceFailureException(Throwable cause) {
-        super(cause);
-    }
-
-    /**
-     * Creates new instance of ServiceFailureException with
      * the specified detail message and cause.
      *
      * @param msg: the detail message.
