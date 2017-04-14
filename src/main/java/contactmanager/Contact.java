@@ -1,4 +1,4 @@
-package backend;
+package contactmanager;
 
 import java.time.LocalDate;
 import java.util.Objects;

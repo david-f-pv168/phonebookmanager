@@ -1,4 +1,4 @@
-package backend;
+package contactmanager;
 
 import common.IllegalEntityException;
 import common.ServiceFailureException;
@@ -6,13 +6,10 @@ import common.ValidationException;
 
 import javax.sql.DataSource;
 import java.sql.*;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import static backend.DBUtils.toLocalDate;
 
 /**
  * @author  David Frankl

@@ -1,15 +1,15 @@
-package backend;
+package contactmanager;
 
-import backend.*;
 import common.IllegalEntityException;
 import common.ServiceFailureException;
 import common.ValidationException;
-import org.apache.derby.jdbc.EmbeddedDataSource;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import javax.sql.DataSource;
+import java.io.File;
+import java.net.URL;
 import java.sql.SQLException;
 import java.time.*;
 
@@ -36,17 +36,9 @@ public class ContactManagerImplTest {
         return now.atStartOfDay().toInstant(ZoneOffset.UTC);
     }
 
-    private static DataSource prepareDataSource() throws SQLException {
-        EmbeddedDataSource ds = new EmbeddedDataSource();
-        ds.setDatabaseName("memory:contactmngr-test");
-        ds.setCreateDatabase("create");
-        return ds;
-    }
-
     @Before
-    public void setUp() throws SQLException {
-        ds = prepareDataSource();
-        DBUtils.executeSqlScript(ds, ContactManager.class.getResource("createTables.sql"));
+    public void setUp() throws SQLException, java.net.MalformedURLException {
+        ds = Main.createMemoryDatabaseWithTables(false);
         contactManager = new ContactManagerImpl(Clock.fixed(prepareClockMock(NOW), ZoneId.of("UTC")));
         contactManager.setDataSource(ds);
 
@@ -57,8 +49,8 @@ public class ContactManagerImplTest {
     }
 
     @After
-    public void tearDown() throws SQLException {
-        DBUtils.executeSqlScript(ds, ContactManager.class.getResource("dropTables.sql"));
+    public void tearDown() throws SQLException, java.net.MalformedURLException {
+        DBUtils.executeSqlScript(ds, Main.class.getResource("/dropTables.sql"));
     }
 
     private Contact.Builder sample_house_builder() {

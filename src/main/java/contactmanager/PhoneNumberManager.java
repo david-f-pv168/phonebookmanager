@@ -1,4 +1,4 @@
-package backend;
+package contactmanager;
 
 import common.IllegalEntityException;
 import common.ServiceFailureException;

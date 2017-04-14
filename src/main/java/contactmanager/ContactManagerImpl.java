@@ -1,4 +1,4 @@
-package backend;
+package contactmanager;
 
 import common.IllegalEntityException;
 import common.ServiceFailureException;
@@ -11,8 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import static backend.DBUtils.*;
 
 /**
  * @author  David Frankl
@@ -120,7 +118,7 @@ public class ContactManagerImpl implements ContactManager {
 			st.setString(1, contact.getFirstName());
 			st.setString(2, contact.getSurname());
 			st.setString(3, contact.getPrimaryEmail());
-			st.setDate(4, toSqlDate(contact.getBirthday()));
+			st.setDate(4, DBUtils.toSqlDate(contact.getBirthday()));
 			st.setLong(5, contact.getID());
 
 			int count = st.executeUpdate();
@@ -289,7 +287,7 @@ public class ContactManagerImpl implements ContactManager {
 		contact.setFirstName(set.getString("first_name"));
 		contact.setSurname(set.getString("surname"));
 		contact.setPrimaryEmail(set.getString("primary_email"));
-		contact.setBirthday(toLocalDate(set.getDate("birthday")));
+		contact.setBirthday(DBUtils.toLocalDate(set.getDate("birthday")));
 
 		return contact;
 	}
