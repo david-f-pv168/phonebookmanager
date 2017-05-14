@@ -8,8 +8,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import javax.sql.DataSource;
-import java.io.File;
-import java.net.URL;
 import java.sql.SQLException;
 import java.time.*;
 
@@ -31,7 +29,7 @@ public class PhoneNumberManagerImplTest {
 
     @Before
     public void setUp() throws SQLException, java.net.MalformedURLException {
-        ds = Main.createMemoryDatabaseWithTables(false);
+        ds = DBUtils.createMemoryDatabaseWithTables(false);
         phoneManager = new PhoneNumberManagerImpl();
         phoneManager.setDataSource(ds);
 
@@ -42,7 +40,7 @@ public class PhoneNumberManagerImplTest {
 
     @After
     public void tearDown() throws SQLException, java.net.MalformedURLException {
-        DBUtils.executeSqlScript(ds, Main.class.getResource("/dropTables.sql"));
+        DBUtils.executeSqlScript(ds, DBUtils.class.getResource("/dropTables.sql"));
     }
 
     private Contact.Builder sample_house_builder() {

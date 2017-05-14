@@ -2,6 +2,7 @@ package contactmanager;
 
 import common.IllegalEntityException;
 import common.ServiceFailureException;
+import org.apache.derby.jdbc.EmbeddedDataSource;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -11,6 +12,8 @@ import java.sql.*;
 import java.time.LocalDate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static org.apache.log4j.helpers.Loader.getResource;
 
 /**
  * Created by David Frankl on 24-Mar-17.
@@ -174,5 +177,17 @@ public class DBUtils {
      */
     public static Date toSqlDate(LocalDate localDate) {
         return localDate == null ? null : Date.valueOf(localDate);
+    }
+
+    public static DataSource createMemoryDatabaseWithTables(boolean withData) throws SQLException {
+        EmbeddedDataSource ds = new EmbeddedDataSource();
+        ds.setDatabaseName("memory:contactsDB;create=true");
+        executeSqlScript(ds, DBUtils.class.getResource("/createTables.sql"));
+
+        if (withData) {
+            executeSqlScript(ds, getResource("/populateTables.sql"));
+        }
+
+        return ds;
     }
 }

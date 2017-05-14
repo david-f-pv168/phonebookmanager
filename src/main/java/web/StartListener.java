@@ -1,7 +1,7 @@
 package web;
 
 import contactmanager.ContactManagerImpl;
-import contactmanager.Main;
+import contactmanager.DBUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +24,7 @@ public class StartListener implements ServletContextListener {
         ContactManagerImpl contactManager = new ContactManagerImpl(Clock.systemDefaultZone());
 
         try {
-            contactManager.setDataSource(Main.createMemoryDatabaseWithTables(true));
+            contactManager.setDataSource(DBUtils.createMemoryDatabaseWithTables(true));
         }
         catch (SQLException ex) {
             log.info("Error creating a DB. Please restart the application.");
