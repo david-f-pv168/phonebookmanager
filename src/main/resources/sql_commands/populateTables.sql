@@ -1,0 +1,2 @@
+INSERT INTO CONTACT (FIRST_NAME, SURNAME, PRIMARY_EMAIL, BIRTHDAY)
+VALUES ('Gregory', 'House', 'gregory.house@fi.muni.cz', '1958-06-11');

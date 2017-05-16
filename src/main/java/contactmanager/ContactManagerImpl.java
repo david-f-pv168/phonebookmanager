@@ -242,13 +242,13 @@ public class ContactManagerImpl implements ContactManager {
 	 * @throws ValidationException if both first name and surname are null or
 	 * when birthday is after current LocalDate
 	 */
-	private void validateContact(Contact contact) {
+	public void validateContact(Contact contact) {
 		if (contact == null) {
 			throw new IllegalArgumentException("Contact is null.");
 		}
 
 		if (contact.getFirstName() == null && contact.getSurname() == null) {
-			throw new ValidationException("Both first name and surname is null.");
+			throw new ValidationException("Both first name and surname is null");
 		}
 
 		LocalDate today = LocalDate.now(clock);

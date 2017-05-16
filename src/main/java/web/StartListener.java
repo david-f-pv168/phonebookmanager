@@ -23,12 +23,7 @@ public class StartListener implements ServletContextListener {
         ServletContext servletContext = ev.getServletContext();
         ContactManagerImpl contactManager = new ContactManagerImpl(Clock.systemDefaultZone());
 
-        try {
-            contactManager.setDataSource(DBUtils.createMemoryDatabaseWithTables(true));
-        }
-        catch (SQLException ex) {
-            log.info("Error creating a DB. Please restart the application.");
-        }
+        contactManager.setDataSource(DBUtils.createMemoryDatabaseWithTables(true));
 
         servletContext.setAttribute("contactManager", contactManager);
         log.info("Contact manager created and stored to servletContext.");

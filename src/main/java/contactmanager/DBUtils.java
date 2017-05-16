@@ -179,13 +179,24 @@ public class DBUtils {
         return localDate == null ? null : Date.valueOf(localDate);
     }
 
-    public static DataSource createMemoryDatabaseWithTables(boolean withData) throws SQLException {
+    public static DataSource createMemoryDatabaseWithTables(boolean withData) {
         EmbeddedDataSource ds = new EmbeddedDataSource();
         ds.setDatabaseName("memory:contactsDB;create=true");
-        executeSqlScript(ds, DBUtils.class.getResource("/createTables.sql"));
+
+        try {
+            executeSqlScript(ds, DBUtils.class.getResource("/sql_commands/createTables.sql"));
+        }
+        catch (SQLException ex) {
+            logger.log(Level.SEVERE, "Error while creating a new DB", ex);
+        }
 
         if (withData) {
-            executeSqlScript(ds, getResource("/populateTables.sql"));
+            try {
+                executeSqlScript(ds, DBUtils.class.getResource("/sql_commands/populateTables.sql"));
+            }
+            catch (SQLException ex) {
+                logger.log(Level.SEVERE, "Error while pre-loading the DB", ex);
+            }
         }
 
         return ds;

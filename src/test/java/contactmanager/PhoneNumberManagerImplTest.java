@@ -28,7 +28,7 @@ public class PhoneNumberManagerImplTest {
     private DataSource ds;
 
     @Before
-    public void setUp() throws SQLException, java.net.MalformedURLException {
+    public void setUp() throws java.net.MalformedURLException {
         ds = DBUtils.createMemoryDatabaseWithTables(false);
         phoneManager = new PhoneNumberManagerImpl();
         phoneManager.setDataSource(ds);
@@ -40,7 +40,7 @@ public class PhoneNumberManagerImplTest {
 
     @After
     public void tearDown() throws SQLException, java.net.MalformedURLException {
-        DBUtils.executeSqlScript(ds, DBUtils.class.getResource("/dropTables.sql"));
+        DBUtils.executeSqlScript(ds, DBUtils.class.getResource("/sql_commands/dropTables.sql"));
     }
 
     private Contact.Builder sample_house_builder() {

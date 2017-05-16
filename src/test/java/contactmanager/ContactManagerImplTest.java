@@ -35,7 +35,7 @@ public class ContactManagerImplTest {
     }
 
     @Before
-    public void setUp() throws SQLException, java.net.MalformedURLException {
+    public void setUp() throws java.net.MalformedURLException {
         ds = DBUtils.createMemoryDatabaseWithTables(false);
         contactManager = new ContactManagerImpl(Clock.fixed(prepareClockMock(NOW), ZoneId.of("UTC")));
         contactManager.setDataSource(ds);
@@ -48,7 +48,7 @@ public class ContactManagerImplTest {
 
     @After
     public void tearDown() throws SQLException, java.net.MalformedURLException {
-        DBUtils.executeSqlScript(ds, DBUtils.class.getResource("/dropTables.sql"));
+        DBUtils.executeSqlScript(ds, DBUtils.class.getResource("/sql_commands/dropTables.sql"));
     }
 
     private Contact.Builder sample_house_builder() {
@@ -300,6 +300,7 @@ public class ContactManagerImplTest {
         void callOn(T subjectOfOperation);
     }
 
+    @SuppressWarnings("Duplicates")
     private void testExpectedServiceFailureException(Operation<ContactManager> operation) throws SQLException {
         SQLException sqlException = new SQLException();
         DataSource failingDataSource = mock(DataSource.class);
