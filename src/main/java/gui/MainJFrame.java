@@ -6,10 +6,12 @@ import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.UtilDateModel;
 import workers.AddContactWorker;
+import workers.ContactDetailsWorker;
 import workers.ContactDownloadWorker;
 import workers.RemoveContactWorker;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.time.LocalDate;
 import java.util.Properties;
@@ -24,10 +26,10 @@ public class MainJFrame extends JFrame{
     private JTable contactsTable;
     private JButton contactDetailsButton;
     private JButton contactDeleteButton;
-    private JLabel Name;
-    private JLabel Surname;
-    private JLabel Email;
-    private JLabel Birthday;
+    private JLabel nameLabel;
+    private JLabel surnameLabel;
+    private JLabel emailLabel;
+    private JLabel birthdayLabel;
     private JTextField contactFirstNameTextField;
     private JTextField contactSurnameTextField;
     private JTextField contactPrimaryEmailTextField;
@@ -43,6 +45,7 @@ public class MainJFrame extends JFrame{
     public void init() {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setContentPane(mainPanel);
+        setTitle("Contacts");
         pack();
         setVisible(true);
 
@@ -60,8 +63,31 @@ public class MainJFrame extends JFrame{
         contactsTable.getTableHeader().setDefaultRenderer(new TableHeaderRenderer(contactsTable));
     }
 
+    /**
+     * Executes ContactDetailsWorker on a contact if the contact is not
+     * yet displayed on details tab. Focuses on the contact otherwise.
+     *
+     * @param event: click event
+     */
     private void contactDetailsButtonPressed(ActionEvent event) {
+        int selectedRow = contactsTable.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(contactDeleteButton, ResourceBundle.getBundle("messages").getString("noDataSelected"));
+            return;
+        }
 
+        ContactsTableModel model = (ContactsTableModel) contactsTable.getModel();
+        Contact contact = model.getContactAt(selectedRow);
+
+        for (Component tab: contactsPane.getComponents()) {
+            Object panelID = ((JPanel) tab).getClientProperty(DetailsFrame.FrameID);
+            if (panelID != null && contact.getID().toString().equals(panelID.toString())) {
+                contactsPane.setSelectedComponent(tab);
+                return;
+            }
+        }
+
+        new ContactDetailsWorker(contact,this).execute();
     }
 
     private void contactDeleteButtonPressed(ActionEvent event) {
@@ -119,6 +145,10 @@ public class MainJFrame extends JFrame{
 
     public ContactsTableModel getContactsTableModel() {
         return (ContactsTableModel) contactsTable.getModel();
+    }
+
+    public JTabbedPane getContactsPane() {
+        return contactsPane;
     }
 
     public void clearNewContactData() {

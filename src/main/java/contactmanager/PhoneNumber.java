@@ -61,7 +61,7 @@ public class PhoneNumber {
 
     @Override
     public String toString() {
-        return "PhoneNUmber{"
+        return "PhoneNumber{"
                 + "ID: " + ID
                 + ", full number: " + countryCode + " " + number
                 + ", phone type: " + phoneType

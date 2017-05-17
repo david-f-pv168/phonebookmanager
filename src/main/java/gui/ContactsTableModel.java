@@ -1,9 +1,5 @@
 package gui;
 
-/**
- * Created by David on 14-May-17.
- */
-
 import contactmanager.Contact;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,8 +11,10 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Table model for Contact entities Vojtech Sassmann on 3. 5. 2017.
+ * Created by David on 14-May-17.
  */
+
+
 public class ContactsTableModel extends AbstractTableModel {
 
     final static Logger log = LoggerFactory.getLogger(ContactsTableModel.class);
@@ -53,10 +51,12 @@ public class ContactsTableModel extends AbstractTableModel {
     }
 
     public void editContact(Contact editedContact) {
-        editedContact.setFirstName(editedContact.getFirstName());
-        editedContact.setSurname(editedContact.getSurname());
-        editedContact.setPrimaryEmail(editedContact.getPrimaryEmail());
-        editedContact.setBirthday(editedContact.getBirthday());
+        Contact contact = findContactWithID(editedContact.getID());
+
+        contact.setFirstName(editedContact.getFirstName());
+        contact.setSurname(editedContact.getSurname());
+        contact.setPrimaryEmail(editedContact.getPrimaryEmail());
+        contact.setBirthday(editedContact.getBirthday());
 
         fireTableDataChanged();
     }
