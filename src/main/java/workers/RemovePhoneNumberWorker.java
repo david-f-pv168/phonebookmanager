@@ -38,7 +38,7 @@ public class RemovePhoneNumberWorker extends SwingWorker<Void, Void> {
     protected void done() {
         try {
             get();
-            PhoneNumbersTableModel model = detailsFrame.getPhonesTableModel();
+            PhoneNumbersTableModel model = detailsFrame.getPhoneNumbersTableModel();
             model.removePhoneNumber(phone);
         } catch (InterruptedException e) {
             throw new AssertionError();
@@ -46,7 +46,7 @@ public class RemovePhoneNumberWorker extends SwingWorker<Void, Void> {
             JOptionPane.showMessageDialog(detailsFrame.getMainPanel(),
                     ResourceBundle.getBundle("messages").getString("connectionError"));
         } finally {
-            detailsFrame.setPhonesButtonsEnabled(true);
+            detailsFrame.setPhoneNumbersButtonsEnabled(true);
         }
     }
 }

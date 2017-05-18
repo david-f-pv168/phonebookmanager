@@ -1,38 +1,34 @@
 package workers;
 
-import contactmanager.Contact;
-import contactmanager.ContactManager;
-import gui.ContactsTableModel;
-import gui.DetailsFrame;
-import gui.Main;
-import gui.MainJFrame;
+import contactmanager.*;
+import gui.*;
 
 import javax.swing.*;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutionException;
 
 /**
- * Worker class for editing contact
+ * Worker class for editing contact's phone number
  */
 public class EditPhoneNumberWorker extends SwingWorker<Void, Void> {
-    private MainJFrame mainJFrame;
-    private Contact contact;
+    private PhoneNumber phone;
+    private DetailsFrame detailsFrame;
 
-    public EditPhoneNumberWorker(Contact contact, MainJFrame mainJFrame, DetailsFrame detailsFrame) {
-        if(contact == null) {
-            throw new IllegalArgumentException("Contact is null");
+    public EditPhoneNumberWorker(PhoneNumber phone, DetailsFrame detailsFrame) {
+        if(phone == null) {
+            throw new IllegalArgumentException("Contact's phone number is null");
         }
-        if(mainJFrame == null) {
+        if(detailsFrame == null) {
             throw new IllegalArgumentException("Form is null.");
         }
-        this.contact = contact;
-        this.mainJFrame = mainJFrame;
+        this.phone = phone;
+        this.detailsFrame = detailsFrame;
     }
 
     @Override
     protected Void doInBackground() throws Exception {
-        ContactManager contactManager = Main.getContactManager();
-        contactManager.updateContact(contact);
+        PhoneNumberManager phonemanager = Main.getPhoneNumberManager();
+        phonemanager.updatePhone(phone);
         return null;
     }
 
@@ -40,14 +36,18 @@ public class EditPhoneNumberWorker extends SwingWorker<Void, Void> {
     protected void done() {
         try {
             get();
-            ContactsTableModel model = mainJFrame.getContactsTableModel();
-            model.editContact(contact);
-            mainJFrame.clearNewContactData();
+            PhoneNumbersTableModel model = detailsFrame.getPhoneNumbersTableModel();
+            model.editPhoneNumber(phone);
+            detailsFrame.clearPhoneData();
         } catch (InterruptedException e) {
             throw new AssertionError();
         } catch (ExecutionException e) {
-            JOptionPane.showMessageDialog(mainJFrame,
+            JOptionPane.showMessageDialog(detailsFrame.getMainPanel(),
                     ResourceBundle.getBundle("messages").getString("connectionError"));
+        } finally {
+            detailsFrame.setEditMode(false);
+            detailsFrame.setPhoneNumbersButtonsEnabled(true);
+            detailsFrame.clearPhoneData();
         }
     }
 }

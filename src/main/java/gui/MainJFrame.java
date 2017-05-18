@@ -94,7 +94,7 @@ public class MainJFrame extends JFrame{
 
         setContactsButtonsEnabled(false);
 
-        ContactsTableModel model = (ContactsTableModel) contactsTable.getModel();
+        ContactsTableModel model = getContactsTableModel();
         Contact contact = model.getContactAt(selectedRow);
 
         new RemoveContactWorker(contact, this).execute();

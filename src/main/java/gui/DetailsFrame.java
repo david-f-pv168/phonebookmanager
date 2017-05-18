@@ -3,14 +3,16 @@ package gui;
 import common.ValidationException;
 import contactmanager.Contact;
 import contactmanager.DBUtils;
+import contactmanager.PhoneNumber;
 import org.jdatepicker.impl.JDatePickerImpl;
-import workers.EditContactWorker;
+import workers.*;
+
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.time.LocalDate;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.ResourceBundle;
 
 import static gui.guiUtils.*;
 
@@ -29,8 +31,8 @@ public class DetailsFrame {
     private JTextField phoneTypeTextField;
     private JTextField phoneNumberTextField;
     private JTextField phoneCountryCodeTextField;
-    private JButton clearDataButton;
-    private JButton phoneNumberAddButton;
+    private JButton clearPhoneDataButton;
+    private JButton phoneNumberUpsertButton;
     private JLabel surnameLabel;
     private JLabel emailLabel;
     private JLabel birthdayLabel;
@@ -41,10 +43,8 @@ public class DetailsFrame {
     private JButton phoneNumberEditButton;
     private JButton phoneNumberDeleteButton;
 
-    private String contactFirstNameCache = "";
-    private String contactSurnameCache = "";
-    private String contactPrimaryEmailCache = "";
-    private Calendar contactBirthdayCache = new GregorianCalendar();
+    private Contact contact;
+    private Long phoneInEditID;
 
     public final static String FrameID = "FrameID";
 
@@ -59,6 +59,11 @@ public class DetailsFrame {
 
         contactEditButton.addActionListener(this::contactEditButtonPressed);
         contactSaveButton.addActionListener(this::contactSaveButtonPressed);
+
+        phoneNumberUpsertButton.addActionListener(this::phoneNumberUpsertButtonPressed);
+        phoneNumberDeleteButton.addActionListener(this:: phoneNumberDeleteButtonPressed);
+        clearPhoneDataButton.addActionListener(this::clearPhoneDataButtonPressed);
+        phoneNumberEditButton.addActionListener(this:: phoneNumberEditButtonPressed);
     }
 
     private void createUIComponents() {
@@ -68,10 +73,8 @@ public class DetailsFrame {
     public void contactEditButtonPressed(ActionEvent event) {
         setContactTextFieldsEnabled(!contactFirstNameTextField.isEnabled());
 
-        if (contactFirstNameTextField.isEnabled()) {
-            setContactTextFieldsFromCache();
-        } else {
-            cacheContactTextFields();
+        if (!contactFirstNameTextField.isEnabled()) {
+            setContact(contact);
         }
     }
 
@@ -95,15 +98,83 @@ public class DetailsFrame {
         new EditContactWorker(contact, topFrame, this).execute();
     }
 
-    public PhoneNumbersTableModel getPhonesTableModel() {
-        return (PhoneNumbersTableModel) phonesTable.getModel();
+    private void phoneNumberDeleteButtonPressed(ActionEvent event) {
+        int selectedRow = phonesTable.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(phoneNumberDeleteButton, ResourceBundle.getBundle("messages").getString("noDataSelected"));
+            return;
+        }
+
+        setPhoneNumbersButtonsEnabled(false);
+
+        PhoneNumbersTableModel model = getPhoneNumbersTableModel();
+        PhoneNumber phone = model.getPhoneNumberAt(selectedRow);
+
+        new RemovePhoneNumberWorker(phone, this).execute();
     }
 
-    public void setPhonesButtonsEnabled(Boolean value) {
-        phoneNumberAddButton.setEnabled(value);
+    private void phoneNumberEditButtonPressed(ActionEvent event) {
+        int selectedRow = phonesTable.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(phoneNumberDeleteButton, ResourceBundle.getBundle("messages").getString("noDataSelected"));
+            return;
+        }
+        setEditMode(true);
+
+        PhoneNumber phone = getPhoneNumbersTableModel().getPhoneNumberAt(selectedRow);
+        phoneCountryCodeTextField.setText(phone.getCountryCode());
+        phoneNumberTextField.setText(phone.getNumber());
+        phoneTypeTextField.setText(phone.getPhoneType());
+        phoneInEditID = phone.getID();
+    }
+
+
+    private void phoneNumberUpsertButtonPressed(ActionEvent event) {
+        setPhoneNumbersButtonsEnabled(false);
+
+        PhoneNumber phone = getPhoneNumberFromAddForm();
+        try {
+            Main.getPhoneNumberManager().validatePhone(phone);
+        }
+        catch (ValidationException ex) {
+            setPhoneNumbersButtonsEnabled(true);
+            JOptionPane.showMessageDialog(mainPanel, ex.getMessage());
+            return;
+        }
+
+        if (phoneNumberUpsertButton.getText().equals("Confirm edit")) {
+            phone.setID(phoneInEditID);
+            new EditPhoneNumberWorker(phone, this).execute();
+        } else {
+            new AddPhoneNumberWorker(contact, phone, this).execute();
+        }
+
+    }
+
+    public void clearPhoneDataButtonPressed(ActionEvent event) {
+        clearPhoneData();
+        setEditMode(false);
+    }
+
+    private PhoneNumber getPhoneNumberFromAddForm() {
+        return new PhoneNumber.Builder()
+                .countryCode(getNonEmptyTextOrNull(phoneCountryCodeTextField))
+                .number(getNonEmptyTextOrNull(phoneNumberTextField))
+                .phoneType(getNonEmptyTextOrNull(phoneTypeTextField))
+                .build();
+    }
+
+    public void setPhoneNumbersButtonsEnabled(Boolean value) {
+        phoneNumberUpsertButton.setEnabled(value);
         phoneNumberDeleteButton.setEnabled(value);
         phoneNumberEditButton.setEnabled(value);
-        clearDataButton.setEnabled(value);
+        clearPhoneDataButton.setEnabled(value);
+    }
+
+    public void clearPhoneData() {
+        phoneCountryCodeTextField.setText("");
+        phoneNumberTextField.setText("");
+        phoneTypeTextField.setText("");
     }
 
     public JPanel getMainPanel() {
@@ -115,6 +186,7 @@ public class DetailsFrame {
     }
 
     public void setContact(Contact contact) {
+        this.contact = contact;
         contactFirstNameTextField.setText(contact.getFirstName());
         contactSurnameTextField.setText(contact.getSurname());
         contactPrimaryEmailTextField.setText(contact.getPrimaryEmail());
@@ -130,6 +202,16 @@ public class DetailsFrame {
         }
     }
 
+    public void setEditMode(Boolean inEditMode) {
+        if (inEditMode) {
+            clearPhoneDataButton.setText("Cancel edit");
+            phoneNumberUpsertButton.setText("Confirm edit");
+        } else {
+            clearPhoneDataButton.setText("Clear data");
+            phoneNumberUpsertButton.setText("Add phone");
+        }
+    }
+
     private void setContactTextFieldsEnabled(boolean value) {
         contactFirstNameTextField.setEnabled(value);
         contactSurnameTextField.setEnabled(value);
@@ -141,20 +223,6 @@ public class DetailsFrame {
         } else {
             contactEditButton.setText("Edit contact");
         }
-    }
-
-    private void setContactTextFieldsFromCache() {
-        contactFirstNameCache = contactFirstNameTextField.getText();
-        contactSurnameCache = contactSurnameTextField.getText();
-        contactPrimaryEmailCache = contactPrimaryEmailTextField.getText();
-        contactBirthdayCache = (GregorianCalendar) contactBirthdayDatePicker.getJFormattedTextField().getValue();
-    }
-
-    private void cacheContactTextFields() {
-        contactFirstNameTextField.setText(contactFirstNameCache);
-        contactSurnameTextField.setText(contactSurnameCache);
-        contactPrimaryEmailTextField.setText(contactPrimaryEmailCache);
-        contactBirthdayDatePicker.getJFormattedTextField().setValue(contactBirthdayCache);
     }
 
     private Contact getContactFromTextFields() {

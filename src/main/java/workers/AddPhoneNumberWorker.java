@@ -1,37 +1,39 @@
 package workers;
 
 import contactmanager.Contact;
-import contactmanager.ContactManager;
-import gui.ContactsTableModel;
-import gui.Main;
-import gui.MainJFrame;
+import contactmanager.PhoneNumber;
+import contactmanager.PhoneNumberManager;
+import gui.*;
 
 import javax.swing.*;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutionException;
 
 /**
- * Worker class for adding contact to DB
+ * Worker class for adding contact's phone number to DB
  */
 public class AddPhoneNumberWorker extends SwingWorker<Void, Void> {
-    private MainJFrame mainJFrame;
     private Contact contact;
+    private PhoneNumber phone;
+    private DetailsFrame detailsFrame;
 
-    public AddPhoneNumberWorker(Contact contact, MainJFrame mainJFrame) {
+    public AddPhoneNumberWorker(Contact contact, PhoneNumber phone, DetailsFrame detailsFrame) {
         if(contact == null) {
             throw new IllegalArgumentException("Contact is null.");
         }
-        if(mainJFrame == null) {
-            throw new IllegalArgumentException("Form is null.");
+        if(detailsFrame == null) {
+            throw new IllegalArgumentException("Details panel is null.");
         }
-        this.mainJFrame = mainJFrame;
+
         this.contact = contact;
+        this.phone = phone;
+        this.detailsFrame = detailsFrame;
     }
 
     @Override
     protected Void doInBackground() throws Exception {
-        ContactManager contactManager = Main.getContactManager();
-        contactManager.createContact(contact);
+        PhoneNumberManager phoneManager = Main.getPhoneNumberManager();
+        phoneManager.addPhone(contact, phone);
         return null;
     }
 
@@ -39,15 +41,16 @@ public class AddPhoneNumberWorker extends SwingWorker<Void, Void> {
     protected void done() {
         try {
             get();
-            ContactsTableModel ctmodel = mainJFrame.getContactsTableModel();
-            ctmodel.addContact(contact);
-            mainJFrame.clearNewContactData();
+            PhoneNumbersTableModel pnmodel = detailsFrame.getPhoneNumbersTableModel();
+            pnmodel.addPhoneNumber(phone);
+            detailsFrame.clearPhoneData();
         } catch (InterruptedException e) {
             throw new AssertionError();
         } catch (ExecutionException e) {
-            JOptionPane.showMessageDialog(mainJFrame, ResourceBundle.getBundle("messages").getString("connectionError"));
+            JOptionPane.showMessageDialog(detailsFrame.getMainPanel(),
+                    ResourceBundle.getBundle("messages").getString("connectionError"));
         } finally {
-            mainJFrame.setContactsButtonsEnabled(true);
+            detailsFrame.setPhoneNumbersButtonsEnabled(true);
         }
     }
 }

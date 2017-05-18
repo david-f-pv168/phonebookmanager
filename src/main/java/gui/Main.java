@@ -40,7 +40,7 @@ public class Main {
         return contactManager;
     }
 
-    public static PhoneNumberManager getPhoneNumberManager() {
+    public static PhoneNumberManagerImpl getPhoneNumberManager() {
         if (phoneManager == null) {
             phoneManager = new PhoneNumberManagerImpl();
             phoneManager.setDataSource(getDB());

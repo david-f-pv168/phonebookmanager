@@ -193,7 +193,7 @@
                 <properties/>
                 <border type="none"/>
                 <children>
-                  <component id="320fc" class="javax.swing.JButton" binding="clearDataButton" default-binding="true">
+                  <component id="320fc" class="javax.swing.JButton" binding="clearPhoneDataButton" default-binding="true">
                     <constraints>
                       <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                     </constraints>
@@ -201,7 +201,7 @@
                       <text value="Clear data"/>
                     </properties>
                   </component>
-                  <component id="eb1b1" class="javax.swing.JButton" binding="phoneNumberAddButton">
+                  <component id="eb1b1" class="javax.swing.JButton" binding="phoneNumberUpsertButton">
                     <constraints>
                       <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                     </constraints>

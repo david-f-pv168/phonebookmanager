@@ -203,7 +203,7 @@ public class PhoneNumberManagerImpl implements PhoneNumberManager {
 	 * @throws IllegalArgumentException if contact is null.
 	 * @throws ValidationException if either phone number or country code is null.
 	 */
-	private void validatePhone(PhoneNumber phone) {
+	public void validatePhone(PhoneNumber phone) {
 		if (phone == null) {
 			throw new IllegalArgumentException("Phone is null.");
 		}
