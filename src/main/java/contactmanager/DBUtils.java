@@ -20,8 +20,7 @@ import static org.apache.log4j.helpers.Loader.getResource;
  */
 public class DBUtils {
 
-    private static final Logger logger = Logger.getLogger(
-            DBUtils.class.getName());
+    private static final Logger logger = Logger.getLogger(DBUtils.class.getName());
 
     /**
      * Closes connection and logs possible error.

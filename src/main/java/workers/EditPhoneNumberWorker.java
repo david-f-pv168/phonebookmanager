@@ -14,11 +14,11 @@ import java.util.concurrent.ExecutionException;
 /**
  * Worker class for editing contact
  */
-public class EditContactWorker extends SwingWorker<Void, Void> {
+public class EditPhoneNumberWorker extends SwingWorker<Void, Void> {
     private MainJFrame mainJFrame;
     private Contact contact;
 
-    public EditContactWorker(Contact contact, MainJFrame mainJFrame, DetailsFrame detailsFrame) {
+    public EditPhoneNumberWorker(Contact contact, MainJFrame mainJFrame, DetailsFrame detailsFrame) {
         if(contact == null) {
             throw new IllegalArgumentException("Contact is null");
         }

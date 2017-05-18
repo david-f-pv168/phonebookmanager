@@ -2,9 +2,7 @@ package gui;
 
 import common.ValidationException;
 import contactmanager.Contact;
-import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
-import org.jdatepicker.impl.UtilDateModel;
 import workers.AddContactWorker;
 import workers.ContactDetailsWorker;
 import workers.ContactDownloadWorker;
@@ -14,7 +12,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.time.LocalDate;
-import java.util.Properties;
+import java.util.Objects;
 import java.util.ResourceBundle;
 
 /**
@@ -79,15 +77,12 @@ public class MainJFrame extends JFrame{
         ContactsTableModel model = (ContactsTableModel) contactsTable.getModel();
         Contact contact = model.getContactAt(selectedRow);
 
-        for (Component tab: contactsPane.getComponents()) {
-            Object panelID = ((JPanel) tab).getClientProperty(DetailsFrame.FrameID);
-            if (panelID != null && contact.getID().toString().equals(panelID.toString())) {
-                contactsPane.setSelectedComponent(tab);
-                return;
-            }
+        JPanel existingContactTab = findContactsTab(contact);
+        if (existingContactTab != null) {
+            contactsPane.setSelectedComponent(existingContactTab);
+        } else {
+            new ContactDetailsWorker(contact,this).execute();
         }
-
-        new ContactDetailsWorker(contact,this).execute();
     }
 
     private void contactDeleteButtonPressed(ActionEvent event) {
@@ -129,9 +124,9 @@ public class MainJFrame extends JFrame{
         String birthday = contactBirthdayDatePicker.getJFormattedTextField().getText();
 
         return new Contact.Builder()
-                .firstName(getNonEmptyTextOrNull(contactFirstNameTextField))
-                .surname(getNonEmptyTextOrNull(contactSurnameTextField))
-                .primaryEmail(getNonEmptyTextOrNull(contactPrimaryEmailTextField))
+                .firstName(guiUtils.getNonEmptyTextOrNull(contactFirstNameTextField))
+                .surname(guiUtils.getNonEmptyTextOrNull(contactSurnameTextField))
+                .primaryEmail(guiUtils.getNonEmptyTextOrNull(contactPrimaryEmailTextField))
                 .birthday(birthday.equals("") ? null: LocalDate.parse(birthday))
                 .build();
     }
@@ -159,23 +154,18 @@ public class MainJFrame extends JFrame{
     }
 
     private void createUIComponents() {
-        UtilDateModel model = new UtilDateModel();
-        Properties p = new Properties();
-        p.put("text.today", "Today");
-        p.put("text.month", "Month");
-        p.put("text.year", "Year");
-
-        JDatePanelImpl jDatePanel = new JDatePanelImpl(model, p);
-        contactBirthdayDatePicker = new JDatePickerImpl(jDatePanel, new DateLabelFormatter());
+        contactBirthdayDatePicker = guiUtils.createDatePicker();
     }
 
-    /**
-     * Returns nonempty text from JTextField or null in case it is an empty String.
-     *
-     * @param textField: textfield to return the value from.
-     * @return: nonempty string from textField or null.
-     */
-    private String getNonEmptyTextOrNull(JTextField textField) {
-        return textField.getText().equals("") ? null: textField.getText();
+    public JPanel findContactsTab(Contact contact) {
+        for (Component tab: contactsPane.getComponents()) {
+            Long panelID = (Long) ((JPanel) tab).getClientProperty(DetailsFrame.FrameID);
+            if (panelID != null && Objects.equals(contact.getID(), panelID)) {
+                return (JPanel) tab;
+            }
+        }
+
+        return null;
     }
+
 }

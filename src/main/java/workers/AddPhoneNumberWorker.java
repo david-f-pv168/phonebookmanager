@@ -3,7 +3,6 @@ package workers;
 import contactmanager.Contact;
 import contactmanager.ContactManager;
 import gui.ContactsTableModel;
-import gui.DetailsFrame;
 import gui.Main;
 import gui.MainJFrame;
 
@@ -12,27 +11,27 @@ import java.util.ResourceBundle;
 import java.util.concurrent.ExecutionException;
 
 /**
- * Worker class for editing contact
+ * Worker class for adding contact to DB
  */
-public class EditContactWorker extends SwingWorker<Void, Void> {
+public class AddPhoneNumberWorker extends SwingWorker<Void, Void> {
     private MainJFrame mainJFrame;
     private Contact contact;
 
-    public EditContactWorker(Contact contact, MainJFrame mainJFrame, DetailsFrame detailsFrame) {
+    public AddPhoneNumberWorker(Contact contact, MainJFrame mainJFrame) {
         if(contact == null) {
-            throw new IllegalArgumentException("Contact is null");
+            throw new IllegalArgumentException("Contact is null.");
         }
         if(mainJFrame == null) {
             throw new IllegalArgumentException("Form is null.");
         }
-        this.contact = contact;
         this.mainJFrame = mainJFrame;
+        this.contact = contact;
     }
 
     @Override
     protected Void doInBackground() throws Exception {
         ContactManager contactManager = Main.getContactManager();
-        contactManager.updateContact(contact);
+        contactManager.createContact(contact);
         return null;
     }
 
@@ -40,14 +39,15 @@ public class EditContactWorker extends SwingWorker<Void, Void> {
     protected void done() {
         try {
             get();
-            ContactsTableModel model = mainJFrame.getContactsTableModel();
-            model.editContact(contact);
+            ContactsTableModel ctmodel = mainJFrame.getContactsTableModel();
+            ctmodel.addContact(contact);
             mainJFrame.clearNewContactData();
         } catch (InterruptedException e) {
             throw new AssertionError();
         } catch (ExecutionException e) {
-            JOptionPane.showMessageDialog(mainJFrame,
-                    ResourceBundle.getBundle("messages").getString("connectionError"));
+            JOptionPane.showMessageDialog(mainJFrame, ResourceBundle.getBundle("messages").getString("connectionError"));
+        } finally {
+            mainJFrame.setContactsButtonsEnabled(true);
         }
     }
 }

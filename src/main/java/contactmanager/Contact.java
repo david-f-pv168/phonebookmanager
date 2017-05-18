@@ -69,17 +69,6 @@ public class Contact {
         this.birthday = birthday;
     }
 
-    @Override
-    public String toString() {
-        return "Contact{"
-                + "ID: " + ID
-                + ", first name: " + firstName
-                + ", surname: " + surname
-                + ", email: " + primaryEmail
-                + ", birthday: " + birthday
-                + '}';
-    }
-
     /**
      * Returns true if obj represents the same contact. Two objects are considered
      * to represent the same contact when both are instances of {@link Contact}

@@ -32,7 +32,7 @@ public class ContactDetailsWorker extends SwingWorker<List<PhoneNumber>, Void> {
 
     @Override
     protected List<PhoneNumber> doInBackground() throws Exception {
-        PhoneNumberManager phoneManager = Main.getPhoneManager();
+        PhoneNumberManager phoneManager = Main.getPhoneNumberManager();
 
         return phoneManager.getPhoneNumbers(contact);
     }
@@ -47,7 +47,7 @@ public class ContactDetailsWorker extends SwingWorker<List<PhoneNumber>, Void> {
             JPanel detailsMainPanel = detailsFrame.getMainPanel();
             detailsMainPanel.putClientProperty(DetailsFrame.FrameID, contact.getID());
 
-            mainJFrame.getContactsPane().addTab(contact.getFirstName() + " " + contact.getSurname(), detailsMainPanel);
+            mainJFrame.getContactsPane().addTab(guiUtils.getPaneTitleFromContact(contact), detailsMainPanel);
             mainJFrame.getContactsPane().setSelectedComponent(detailsMainPanel);
         } catch (InterruptedException e) {
             throw new AssertionError();

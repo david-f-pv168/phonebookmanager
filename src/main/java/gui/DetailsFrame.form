@@ -72,7 +72,7 @@
               <text value="Birthday"/>
             </properties>
           </component>
-          <component id="4d179" class="javax.swing.JTextField" binding="contactBirthdayTextField">
+          <component id="bf06a" class="org.jdatepicker.impl.JDatePickerImpl" binding="contactBirthdayDatePicker" custom-create="true">
             <constraints>
               <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
                 <preferred-size width="150" height="-1"/>
@@ -102,21 +102,21 @@
         <properties/>
         <border type="none"/>
         <children>
-          <component id="4e291" class="javax.swing.JButton" binding="editPhoneButton">
+          <component id="4e291" class="javax.swing.JButton" binding="contactSaveButton">
             <constraints>
               <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="Edit"/>
+              <text value="Save"/>
             </properties>
           </component>
-          <component id="78e0b" class="javax.swing.JButton" binding="editContactButton">
+          <component id="78e0b" class="javax.swing.JButton" binding="contactEditButton">
             <constraints>
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <actionCommand value="Edit Contact"/>
-              <text value="Button"/>
+              <text value="Edit contact"/>
             </properties>
           </component>
         </children>
@@ -193,28 +193,28 @@
                 <properties/>
                 <border type="none"/>
                 <children>
-                  <component id="320fc" class="javax.swing.JButton" binding="button3" default-binding="true">
+                  <component id="320fc" class="javax.swing.JButton" binding="clearDataButton" default-binding="true">
                     <constraints>
                       <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
-                      <text value="Button"/>
+                      <text value="Clear data"/>
                     </properties>
                   </component>
-                  <component id="eb1b1" class="javax.swing.JButton" binding="phoneAddButton">
+                  <component id="eb1b1" class="javax.swing.JButton" binding="phoneNumberAddButton">
                     <constraints>
                       <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <actionCommand value="Add Phone"/>
-                      <text value="Button"/>
+                      <text value="Add phone"/>
                     </properties>
                   </component>
                 </children>
               </grid>
             </children>
           </grid>
-          <grid id="ce75b" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+          <grid id="ce75b" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
             <margin top="0" left="0" bottom="0" right="0"/>
             <constraints>
               <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
@@ -235,6 +235,32 @@
                   </component>
                 </children>
               </scrollpane>
+              <grid id="811bc" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                <margin top="0" left="0" bottom="0" right="0"/>
+                <constraints>
+                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties/>
+                <border type="none"/>
+                <children>
+                  <component id="2c4dd" class="javax.swing.JButton" binding="phoneNumberEditButton">
+                    <constraints>
+                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text value="Edit phone"/>
+                    </properties>
+                  </component>
+                  <component id="6cef7" class="javax.swing.JButton" binding="phoneNumberDeleteButton">
+                    <constraints>
+                      <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text value="Delete phone"/>
+                    </properties>
+                  </component>
+                </children>
+              </grid>
             </children>
           </grid>
         </children>

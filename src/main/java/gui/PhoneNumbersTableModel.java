@@ -57,7 +57,7 @@ public class PhoneNumbersTableModel extends AbstractTableModel {
         fireTableDataChanged();
     }
 
-    public PhoneNumber getPhoneNUmberAt(int index) {
+    public PhoneNumber getPhoneNumberAt(int index) {
         return phones.get(index);//TODO :
     }
 
