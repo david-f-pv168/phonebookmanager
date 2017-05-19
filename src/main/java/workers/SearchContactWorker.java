@@ -9,11 +9,14 @@ import contactmanager.ContactManager;
 import gui.ContactsTableModel;
 import gui.Main;
 import gui.MainJFrame;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutionException;
+import static contactmanager.CheckHelpers.checkMainFrameNotNull;
 
 /**
  * Worker class for getting Customer data from DB
@@ -22,14 +25,16 @@ public class SearchContactWorker extends SwingWorker<List<Contact>, Void> {
     private String part;
     private MainJFrame.SearchType type;
     private MainJFrame mainJFrame;
+    private static final Logger logger = LoggerFactory.getLogger(SearchContactWorker.class.getName());
+
 
     public SearchContactWorker(String part, MainJFrame.SearchType type, MainJFrame mainJFrame) {
-        if(mainJFrame == null) {
-            throw new IllegalArgumentException("Form is null");
-        }
+        checkMainFrameNotNull(mainJFrame, logger);
 
         if(type == null) {
-            throw new IllegalArgumentException("Type is null");
+            String msg = "Type is null";
+            logger.error(msg);
+            throw new IllegalArgumentException(msg);
         }
 
         this.part = part;
@@ -56,9 +61,11 @@ public class SearchContactWorker extends SwingWorker<List<Contact>, Void> {
             ctmodel.removeAllContacts();
             contacts.forEach(ctmodel::addContact);
             ctmodel.fireTableDataChanged();
-        } catch (InterruptedException e1) {
+        } catch (InterruptedException ex) {
+            logger.error("Interrupted exception error.", ex);
             throw new AssertionError();
-        } catch (ExecutionException e1) {
+        } catch (ExecutionException ex) {
+            logger.error("Connection error", ex);
             JOptionPane.showMessageDialog(mainJFrame, ResourceBundle.getBundle("messages").getString("connectionError"));
         }
     }

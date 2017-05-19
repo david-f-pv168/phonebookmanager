@@ -5,6 +5,8 @@ import contactmanager.Contact;
 import contactmanager.DBUtils;
 import contactmanager.PhoneNumber;
 import org.jdatepicker.impl.JDatePickerImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import workers.*;
 
 import javax.swing.*;
@@ -17,7 +19,7 @@ import java.util.ResourceBundle;
 import static gui.guiUtils.*;
 
 /**
- * Created by David on 16-May-17.
+ * Frame representing a contact details tab
  */
 public class DetailsFrame {
     private JPanel mainPanel;
@@ -45,6 +47,7 @@ public class DetailsFrame {
 
     private Contact contact;
     private Long phoneInEditID;
+    private static final Logger logger = LoggerFactory.getLogger(DetailsFrame.class.getName());
 
     public final static String FrameID = "FrameID";
 
@@ -54,23 +57,34 @@ public class DetailsFrame {
         phonesTable.setVisible(true);
         phonesTable.getTableHeader().setReorderingAllowed(false);
 
-        xButton.addActionListener(e -> parentPane.remove(mainPanel));
+        xButton.addActionListener(e -> {
+            parentPane.remove(mainPanel);
+            logger.debug("Closing tab for contact ID: " + contact.getID().toString());
+        });
         setContactTextFieldsEnabled(false);
 
-        contactEditButton.addActionListener(this::contactEditButtonPressed);
-        contactSaveButton.addActionListener(this::contactSaveButtonPressed);
+        contactEditButton.addActionListener(event -> contactEditButtonPressed());
+        contactSaveButton.addActionListener(event -> contactSaveButtonPressed());
 
-        phoneNumberUpsertButton.addActionListener(this::phoneNumberUpsertButtonPressed);
-        phoneNumberDeleteButton.addActionListener(this:: phoneNumberDeleteButtonPressed);
-        clearPhoneDataButton.addActionListener(this::clearPhoneDataButtonPressed);
-        phoneNumberEditButton.addActionListener(this:: phoneNumberEditButtonPressed);
+        phoneNumberUpsertButton.addActionListener(event -> phoneNumberUpsertButtonPressed());
+        phoneNumberDeleteButton.addActionListener(event -> phoneNumberDeleteButtonPressed());
+        clearPhoneDataButton.addActionListener(event -> clearPhoneDataButtonPressed());
+        phoneNumberEditButton.addActionListener(event -> phoneNumberEditButtonPressed());
     }
 
     private void createUIComponents() {
         contactBirthdayDatePicker = createDatePicker();
     }
 
-    public void contactEditButtonPressed(ActionEvent event) {
+    public PhoneNumbersTableModel getPhoneNumbersTableModel() {
+        return (PhoneNumbersTableModel) phonesTable.getModel();
+    }
+
+    public JPanel getMainPanel() {
+        return mainPanel;
+    }
+
+    private void contactEditButtonPressed() {
         setContactTextFieldsEnabled(!contactFirstNameTextField.isEnabled());
 
         if (!contactFirstNameTextField.isEnabled()) {
@@ -78,7 +92,7 @@ public class DetailsFrame {
         }
     }
 
-    private void contactSaveButtonPressed(ActionEvent event) {
+    private void contactSaveButtonPressed() {
         if (!contactFirstNameTextField.isEnabled()) {
             return;
         }
@@ -98,7 +112,7 @@ public class DetailsFrame {
         new EditContactWorker(contact, topFrame, this).execute();
     }
 
-    private void phoneNumberDeleteButtonPressed(ActionEvent event) {
+    private void phoneNumberDeleteButtonPressed() {
         int selectedRow = phonesTable.getSelectedRow();
         if (selectedRow == -1) {
             JOptionPane.showMessageDialog(phoneNumberDeleteButton, ResourceBundle.getBundle("messages").getString("noDataSelected"));
@@ -113,7 +127,7 @@ public class DetailsFrame {
         new RemovePhoneNumberWorker(phone, this).execute();
     }
 
-    private void phoneNumberEditButtonPressed(ActionEvent event) {
+    private void phoneNumberEditButtonPressed() {
         int selectedRow = phonesTable.getSelectedRow();
         if (selectedRow == -1) {
             JOptionPane.showMessageDialog(phoneNumberDeleteButton, ResourceBundle.getBundle("messages").getString("noDataSelected"));
@@ -129,7 +143,7 @@ public class DetailsFrame {
     }
 
 
-    private void phoneNumberUpsertButtonPressed(ActionEvent event) {
+    private void phoneNumberUpsertButtonPressed() {
         setPhoneNumbersButtonsEnabled(false);
 
         PhoneNumber phone = getPhoneNumberFromAddForm();
@@ -151,7 +165,7 @@ public class DetailsFrame {
 
     }
 
-    public void clearPhoneDataButtonPressed(ActionEvent event) {
+    private void clearPhoneDataButtonPressed() {
         clearPhoneData();
         setEditMode(false);
     }
@@ -175,14 +189,6 @@ public class DetailsFrame {
         phoneCountryCodeTextField.setText("");
         phoneNumberTextField.setText("");
         phoneTypeTextField.setText("");
-    }
-
-    public JPanel getMainPanel() {
-        return mainPanel;
-    }
-
-    public PhoneNumbersTableModel getPhoneNumbersTableModel() {
-        return (PhoneNumbersTableModel) phonesTable.getModel();
     }
 
     public void setContact(Contact contact) {

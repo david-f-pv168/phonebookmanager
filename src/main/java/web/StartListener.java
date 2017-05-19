@@ -9,7 +9,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
-import java.sql.SQLException;
 import java.time.Clock;
 
 @WebListener
@@ -23,7 +22,7 @@ public class StartListener implements ServletContextListener {
         ServletContext servletContext = ev.getServletContext();
         ContactManagerImpl contactManager = new ContactManagerImpl(Clock.systemDefaultZone());
 
-        contactManager.setDataSource(DBUtils.createMemoryDatabaseWithTables(true));
+        contactManager.setDataSource(DBUtils.createDatabaseWithTables(true));
 
         servletContext.setAttribute("contactManager", contactManager);
         log.info("Contact manager created and stored to servletContext.");

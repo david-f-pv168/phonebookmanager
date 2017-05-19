@@ -7,13 +7,12 @@ import workers.*;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.time.LocalDate;
 import java.util.Objects;
 import java.util.ResourceBundle;
 
 /**
- * Created by David on 13-May-17.
+ * Main frame holding other components
  */
 public class MainJFrame extends JFrame{
     private JPanel mainPanel;
@@ -48,10 +47,10 @@ public class MainJFrame extends JFrame{
 
         new ContactDownloadWorker(this).execute();
 
-        contactDetailsButton.addActionListener(this::contactDetailsButtonPressed);
-        contactDeleteButton.addActionListener(this::contactDeleteButtonPressed);
-        contactAddButton.addActionListener(this::contactAddButtonPressed);
-        clearDataButton.addActionListener(this::clearDataButtonPressed);
+        contactDetailsButton.addActionListener(event -> contactDetailsButtonPressed());
+        contactDeleteButton.addActionListener(event -> contactDeleteButtonPressed());
+        contactAddButton.addActionListener(event -> contactAddButtonPressed());
+        clearDataButton.addActionListener(event2 -> clearNewContactData());
 
         contactsTable.setModel(new ContactsTableModel());
         contactsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -59,17 +58,28 @@ public class MainJFrame extends JFrame{
         contactsTable.getTableHeader().setReorderingAllowed(false);
         contactsTable.getTableHeader().setDefaultRenderer(new TableHeaderRenderer(contactsTable));
 
-        searchByNameButton.addActionListener(this:: searchByNameButtonPressed);
-        searchByPhoneButton.addActionListener(this:: searchByPhoneButtonPressed);
+        searchByNameButton.addActionListener(event1 -> searchByNameButtonPressed());
+        searchByPhoneButton.addActionListener(event -> searchByPhoneButtonPressed());
+    }
+
+    private void createUIComponents() {
+        contactBirthdayDatePicker = guiUtils.createDatePicker();
+    }
+
+    public ContactsTableModel getContactsTableModel() {
+        return (ContactsTableModel) contactsTable.getModel();
+    }
+
+    public JTabbedPane getContactsPane() {
+        return contactsPane;
     }
 
     /**
      * Executes ContactDetailsWorker on a contact if the contact is not
      * yet displayed on details tab. Focuses on the contact otherwise.
      *
-     * @param event: click event
      */
-    private void contactDetailsButtonPressed(ActionEvent event) {
+    private void contactDetailsButtonPressed() {
         int selectedRow = contactsTable.getSelectedRow();
         if (selectedRow == -1) {
             JOptionPane.showMessageDialog(contactDeleteButton, ResourceBundle.getBundle("messages").getString("noDataSelected"));
@@ -87,7 +97,7 @@ public class MainJFrame extends JFrame{
         }
     }
 
-    private void contactDeleteButtonPressed(ActionEvent event) {
+    private void contactDeleteButtonPressed() {
         int selectedRow = contactsTable.getSelectedRow();
         if (selectedRow == -1) {
             JOptionPane.showMessageDialog(contactDeleteButton, ResourceBundle.getBundle("messages").getString("noDataSelected"));
@@ -102,7 +112,7 @@ public class MainJFrame extends JFrame{
         new RemoveContactWorker(contact, this).execute();
     }
 
-    private void contactAddButtonPressed(ActionEvent event) {
+    private void contactAddButtonPressed() {
         setContactsButtonsEnabled(false);
 
         Contact contact = getContactFromAddForm();
@@ -118,15 +128,11 @@ public class MainJFrame extends JFrame{
         new AddContactWorker(contact,this).execute();
     }
 
-    private void clearDataButtonPressed(ActionEvent event) {
-        clearNewContactData();
-    }
-
-    private void searchByNameButtonPressed(ActionEvent event) {
+    private void searchByNameButtonPressed() {
         new SearchContactWorker(searchByNameTextField.getText(), SearchType.NAME, this).execute();
     }
 
-    private void searchByPhoneButtonPressed(ActionEvent event) {
+    private void searchByPhoneButtonPressed() {
         String phone_part = searchByPhoneTextField.getText();
 
         if (phone_part.equals("")) {
@@ -142,14 +148,6 @@ public class MainJFrame extends JFrame{
         contactDetailsButton.setEnabled(value);
         contactDeleteButton.setEnabled(value);
         clearDataButton.setEnabled(value);
-    }
-
-    public ContactsTableModel getContactsTableModel() {
-        return (ContactsTableModel) contactsTable.getModel();
-    }
-
-    public JTabbedPane getContactsPane() {
-        return contactsPane;
     }
 
     public void clearNewContactData() {
@@ -179,9 +177,5 @@ public class MainJFrame extends JFrame{
                 .primaryEmail(guiUtils.getNonEmptyTextOrNull(contactPrimaryEmailTextField))
                 .birthday(birthday.equals("") ? null: LocalDate.parse(birthday))
                 .build();
-    }
-
-    private void createUIComponents() {
-        contactBirthdayDatePicker = guiUtils.createDatePicker();
     }
 }

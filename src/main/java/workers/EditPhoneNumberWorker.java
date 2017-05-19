@@ -2,10 +2,15 @@ package workers;
 
 import contactmanager.*;
 import gui.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutionException;
+
+import static contactmanager.CheckHelpers.checkDetailsFrameNotNull;
+import static contactmanager.CheckHelpers.checkPhoneNotNull;
 
 /**
  * Worker class for editing contact's phone number
@@ -13,14 +18,12 @@ import java.util.concurrent.ExecutionException;
 public class EditPhoneNumberWorker extends SwingWorker<Void, Void> {
     private PhoneNumber phone;
     private DetailsFrame detailsFrame;
+    private static final Logger logger = LoggerFactory.getLogger(EditPhoneNumberWorker.class.getName());
 
     public EditPhoneNumberWorker(PhoneNumber phone, DetailsFrame detailsFrame) {
-        if(phone == null) {
-            throw new IllegalArgumentException("Contact's phone number is null");
-        }
-        if(detailsFrame == null) {
-            throw new IllegalArgumentException("Form is null.");
-        }
+        checkPhoneNotNull(phone, logger);
+        checkDetailsFrameNotNull(detailsFrame, logger);
+
         this.phone = phone;
         this.detailsFrame = detailsFrame;
     }
@@ -39,9 +42,11 @@ public class EditPhoneNumberWorker extends SwingWorker<Void, Void> {
             PhoneNumbersTableModel model = detailsFrame.getPhoneNumbersTableModel();
             model.editPhoneNumber(phone);
             detailsFrame.clearPhoneData();
-        } catch (InterruptedException e) {
+        } catch (InterruptedException ex) {
+            logger.error("Interrupted exception error.", ex);
             throw new AssertionError();
-        } catch (ExecutionException e) {
+        } catch (ExecutionException ex) {
+            logger.error("Connection error", ex);
             JOptionPane.showMessageDialog(detailsFrame.getMainPanel(),
                     ResourceBundle.getBundle("messages").getString("connectionError"));
         } finally {

@@ -2,18 +2,19 @@ package contactmanager;
 
 import common.IllegalEntityException;
 import common.ServiceFailureException;
+import gui.Main;
 import org.apache.derby.jdbc.EmbeddedDataSource;
-
+import org.slf4j.LoggerFactory;
+import org.apache.commons.dbcp2.BasicDataSource;
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.sql.*;
 import java.time.LocalDate;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import static org.apache.log4j.helpers.Loader.getResource;
 
 /**
  * Created by David Frankl on 24-Mar-17.
@@ -178,15 +179,25 @@ public class DBUtils {
         return localDate == null ? null : Date.valueOf(localDate);
     }
 
-    public static DataSource createMemoryDatabaseWithTables(boolean withData) {
-        EmbeddedDataSource ds = new EmbeddedDataSource();
-        ds.setDatabaseName("memory:contactsDB;create=true");
+    public static DataSource createDatabaseWithTables(boolean withData) {
+        org.slf4j.Logger log = LoggerFactory.getLogger(Main.class);
+
+        Properties dbProperties = new Properties();
+        try {
+            dbProperties.load(Main.class.getClassLoader().getResourceAsStream("db.properties"));
+        } catch (IOException e) {
+            log.error("Error while loading db properties", e);
+            throw new ServiceFailureException("Error while loading db properties", e);
+        }
+        BasicDataSource ds = new BasicDataSource();
+        ds.setDriverClassName(dbProperties.getProperty("DRIVER_CLASS"));
+        ds.setUrl(dbProperties.getProperty("DATABASE_URL"));
 
         try {
             executeSqlScript(ds, DBUtils.class.getResource("/sql_commands/createTables.sql"));
         }
         catch (SQLException ex) {
-            logger.log(Level.SEVERE, "Error while creating a new DB", ex);
+            logger.log(Level.SEVERE, "Error while e new DB", ex);
         }
 
         if (withData) {

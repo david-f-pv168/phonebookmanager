@@ -9,19 +9,21 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static contactmanager.CheckHelpers.*;
 
 /**
  * @author  David Frankl
  */
 public class ContactManagerImpl implements ContactManager {
 
-	private static final Logger logger = Logger.getLogger(
-			ContactManagerImpl.class.getName());
+	private static final Logger logger = LoggerFactory.getLogger(ContactManagerImpl.class.getName());
 
 	private DataSource dataSource;
 	private final Clock clock;
+	private String msg;
 
 	public ContactManagerImpl(Clock clock) {
 		this.clock = clock;
@@ -31,17 +33,13 @@ public class ContactManagerImpl implements ContactManager {
 		this.dataSource = dataSource;
 	}
 
-	private void checkDataSource() {
-		if (dataSource == null) {
-			throw new IllegalStateException("DataSource is not set.");
-		}
-	}
-
 	public void createContact(Contact contact) {
-		checkDataSource();
+		checkDataSourceNotNull(dataSource, logger);
 		validateContact(contact);
 		if (contact.getID() != null) {
-			throw new IllegalEntityException("Contact ID is already set.");
+			msg = "Contact ID is already set.";
+			logger.error(msg);
+			throw new IllegalEntityException(msg);
 		}
 		Connection connection = null;
 		PreparedStatement st = null;
@@ -61,12 +59,13 @@ public class ContactManagerImpl implements ContactManager {
 			int count = st.executeUpdate();
 			DBUtils.checkUpdatesCount(count, contact, true);
 
-			Long id = DBUtils.getId(st.getGeneratedKeys());
-			contact.setID(id);
+			Long ID = DBUtils.getId(st.getGeneratedKeys());
+			contact.setID(ID);
 			connection.commit();
+			logger.info("Contact with id " + ID.toString() + "created");
 		} catch (SQLException ex) {
-			String msg = String.format("Error when inserting contact %s into DB.", contact.getFirstName());
-			logger.log(Level.SEVERE, msg, ex);
+			msg = String.format("Error when inserting contact %s into DB.", contact.getFirstName());
+			logger.error(msg, ex);
 			throw new ServiceFailureException(msg, ex);
 		} finally {
 			DBUtils.doRollbackQuietly(connection);
@@ -76,10 +75,12 @@ public class ContactManagerImpl implements ContactManager {
 
 	public Contact getContact(Long ID) {
 
-		checkDataSource();
+		checkDataSourceNotNull(dataSource, logger);
 
 		if (ID == null) {
-			throw new IllegalArgumentException("ID is null.");
+			msg = "Contact ID is null.";
+			logger.error(msg);
+			throw new IllegalArgumentException(msg);
 		}
 
 		Connection connection = null;
@@ -91,8 +92,8 @@ public class ContactManagerImpl implements ContactManager {
 			statement.setLong(1, ID);
 			return executeQueryForSingleContact(statement);
 		} catch (SQLException ex) {
-			String msg = String.format("Error when getting contact with ID: %s from the DB.", ID);
-			logger.log(Level.SEVERE, msg, ex);
+			msg = String.format("Error when getting contact with ID: %s from the DB.", ID);
+			logger.error(msg, ex);
 			throw new ServiceFailureException(msg, ex);
 		} finally {
 			DBUtils.closeQuietly(connection, statement);
@@ -100,12 +101,10 @@ public class ContactManagerImpl implements ContactManager {
     }
 
 	public void updateContact(Contact contact) {
-		checkDataSource();
+		checkDataSourceNotNull(dataSource, logger);
 		validateContact(contact);
+		checkContactIDNotNull(contact, logger);
 
-		if (contact.getID() == null) {
-			throw new IllegalEntityException("Contact ID is null.");
-		}
 		Connection connection = null;
 		PreparedStatement st = null;
 
@@ -124,9 +123,10 @@ public class ContactManagerImpl implements ContactManager {
 			int count = st.executeUpdate();
 			DBUtils.checkUpdatesCount(count, contact, false);
 			connection.commit();
+			logger.info("Updated contact with id " + contact.toString());
 		} catch (SQLException ex) {
-			String msg = String.format("Error when updating contact: %s  in the DB.", contact.getFirstName());
-			logger.log(Level.SEVERE, msg, ex);
+			msg = String.format("Error when updating contact: %s  in the DB.", contact.getFirstName());
+			logger.error(msg, ex);
 			throw new ServiceFailureException(msg, ex);
 		} finally {
 			DBUtils.doRollbackQuietly(connection);
@@ -135,13 +135,10 @@ public class ContactManagerImpl implements ContactManager {
 	}
 
 	public void deleteContact(Contact contact) {
-		checkDataSource();
-		if (contact == null) {
-			throw new IllegalArgumentException("Contact is null.");
-		}
-		if (contact.getID() == null) {
-			throw new IllegalEntityException("Contact ID is null.");
-		}
+		checkDataSourceNotNull(dataSource, logger);
+		checkContactNotNull(contact, logger);
+		checkContactIDNotNull(contact, logger);
+
 		Connection connection = null;
 		PreparedStatement st = null;
 
@@ -149,16 +146,16 @@ public class ContactManagerImpl implements ContactManager {
 			connection = dataSource.getConnection();
 			connection.setAutoCommit(false);
 
-			st = connection.prepareStatement(
-					"DELETE FROM Contact WHERE id = ?");
+			st = connection.prepareStatement("DELETE FROM Contact WHERE id = ?");
 			st.setLong(1, contact.getID());
 
 			int count = st.executeUpdate();
 			DBUtils.checkUpdatesCount(count, contact, false);
 			connection.commit();
+			logger.info("Deleted contact with id " + contact.toString());
 		} catch (SQLException ex) {
-			String msg = String.format("Error when deleting contact: %s from the DB", contact.getFirstName());
-			logger.log(Level.SEVERE, msg, ex);
+			msg = String.format("Error when deleting contact: %s from the DB", contact.getFirstName());
+			logger.error(msg, ex);
 			throw new ServiceFailureException(msg, ex);
 		} finally {
 			DBUtils.doRollbackQuietly(connection);
@@ -167,9 +164,11 @@ public class ContactManagerImpl implements ContactManager {
 	}
 
 	public List<Contact> findAllContacts() {
-		checkDataSource();
+		checkDataSourceNotNull(dataSource, logger);
 		Connection connection = null;
 		PreparedStatement st = null;
+
+		logger.info("Retrieving all contacts");
 
 		try {
 			connection = dataSource.getConnection();
@@ -177,8 +176,8 @@ public class ContactManagerImpl implements ContactManager {
 					"SELECT id, first_name, surname, primary_email, birthday FROM Contact");
 			return executeQueryForMultipleContacts(st);
 		} catch (SQLException ex) {
-			String msg = "Error when getting all contacts from DB";
-			logger.log(Level.SEVERE, msg, ex);
+			msg = "Error when getting all contacts from DB";
+			logger.error(msg, ex);
 			throw new ServiceFailureException(msg, ex);
 		} finally {
 			DBUtils.closeQuietly(connection, st);
@@ -186,12 +185,16 @@ public class ContactManagerImpl implements ContactManager {
 	}
 
 	public List<Contact> findContactsByName(String name) {
-		checkDataSource();
+		checkDataSourceNotNull(dataSource, logger);
 		Connection connection = null;
 		PreparedStatement st = null;
 
+		logger.info("Retrieving contacts starting with '" + name + "'");
+
 		if (name == null) {
-			throw new IllegalArgumentException("Name characters are null.");
+			msg = "Name characters are null.";
+			logger.error(msg);
+			throw new IllegalArgumentException(msg);
 		}
 
 		try {
@@ -201,8 +204,8 @@ public class ContactManagerImpl implements ContactManager {
 			st.setString(1, name + "%");
 			return executeQueryForMultipleContacts(st);
 		} catch (SQLException ex) {
-			String msg = String.format("Error when finding all contacts starting with name: %s", name);
-			logger.log(Level.SEVERE, msg, ex);
+			msg = String.format("Error when finding all contacts starting with name: %s", name);
+			logger.error(msg, ex);
 			throw new ServiceFailureException(msg, ex);
 		} finally {
 			DBUtils.closeQuietly(connection, st);
@@ -210,12 +213,16 @@ public class ContactManagerImpl implements ContactManager {
 	}
 
 	public List<Contact> findContactsByNumber(String number) {
-		checkDataSource();
+		checkDataSourceNotNull(dataSource, logger);
 		Connection connection = null;
 		PreparedStatement st = null;
 
+		logger.info("Retrieving contacts with number starting with '" + number + "'");
+
 		if (number == null) {
-			throw new IllegalArgumentException("Number characters are null.");
+			msg = "Number characters are null.";
+			logger.error(msg);
+			throw new IllegalArgumentException(msg);
 		}
 
 		try {
@@ -226,8 +233,8 @@ public class ContactManagerImpl implements ContactManager {
 			st.setString(1, number + "%");
 			return executeQueryForMultipleContacts(st);
 		} catch (SQLException ex) {
-			String msg = String.format("Error when finding all contacts starting with number: %s", number);
-			logger.log(Level.SEVERE, msg, ex);
+			msg = String.format("Error when finding all contacts starting with number: %s", number);
+			logger.error(msg, ex);
 			throw new ServiceFailureException(msg, ex);
 		} finally {
 			DBUtils.closeQuietly(connection, st);
@@ -243,9 +250,7 @@ public class ContactManagerImpl implements ContactManager {
 	 * when birthday is after current LocalDate
 	 */
 	public void validateContact(Contact contact) {
-		if (contact == null) {
-			throw new IllegalArgumentException("Contact is null.");
-		}
+		checkContactNotNull(contact, logger);
 
 		if (contact.getFirstName() == null && contact.getSurname() == null) {
 			throw new ValidationException("Both first name and surname is null");
@@ -262,9 +267,12 @@ public class ContactManagerImpl implements ContactManager {
 		if (set.next()) {
 			Contact contact = rowToContact(set);
 			if (set.next()) {
-				throw new ServiceFailureException(
-						"DB integrity error: two or more contacts have the same ID");
+				String msg = "DB integrity error: two or more contacts have the same ID";
+				logger.error(msg);
+				throw new ServiceFailureException(msg);
 			}
+
+			logger.info("Retrieved contact with id " + contact.getID().toString());
 			return contact;
 		} else {
 			return null;
@@ -278,6 +286,7 @@ public class ContactManagerImpl implements ContactManager {
 		while (set.next()) {
 			contacts.add(rowToContact(set));
 		}
+		logger.info(String.format("Retrieved %d contacts", contacts.size()));
 		return contacts;
 	}
 

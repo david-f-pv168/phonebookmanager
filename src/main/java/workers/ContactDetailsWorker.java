@@ -4,30 +4,34 @@ import contactmanager.Contact;
 import contactmanager.PhoneNumber;
 import contactmanager.PhoneNumberManager;
 import gui.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutionException;
+import static contactmanager.CheckHelpers.checkContactNotNull;
+import static contactmanager.CheckHelpers.checkMainFrameNotNull;
 
 /**
- * Created by David on 16-May-17.
+ * Worker class for creating contact details tab.
  */
 public class ContactDetailsWorker extends SwingWorker<List<PhoneNumber>, Void> {
     private MainJFrame mainJFrame;
     private DetailsFrame detailsFrame;
     private Contact contact;
 
+    private static final Logger logger = LoggerFactory.getLogger(ContactDetailsWorker.class.getName());
+
     public ContactDetailsWorker(Contact contact, MainJFrame mainJFrame) {
-        if(contact == null) {
-            throw new IllegalArgumentException("Contact is null.");
-        }
-        if(mainJFrame == null) {
-            throw new IllegalArgumentException("Form is null.");
-        }
+        checkContactNotNull(contact, logger);
+        checkMainFrameNotNull(mainJFrame, logger);
+
         this.mainJFrame = mainJFrame;
         this.contact = contact;
         this.detailsFrame = new DetailsFrame(mainJFrame.getContactsPane());
+        logger.debug("Displaying details for contact with ID: " + contact.getID().toString());
     }
 
     @Override
@@ -49,9 +53,11 @@ public class ContactDetailsWorker extends SwingWorker<List<PhoneNumber>, Void> {
 
             mainJFrame.getContactsPane().addTab(guiUtils.getPaneTitleFromContact(contact), detailsMainPanel);
             mainJFrame.getContactsPane().setSelectedComponent(detailsMainPanel);
-        } catch (InterruptedException e) {
+        } catch (InterruptedException ex) {
+            logger.error("Interrupted exception error.", ex);
             throw new AssertionError();
-        } catch (ExecutionException e) {
+        } catch (ExecutionException ex) {
+            logger.error("Connection error", ex);
             JOptionPane.showMessageDialog(mainJFrame, ResourceBundle.getBundle("messages").getString("connectionError"));
         }
     }

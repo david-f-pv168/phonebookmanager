@@ -1,4 +1,4 @@
-<!-- configuration for logback http://logback.qos.ch/ -->
+<!-- configuration logback.xmlback http://logback.qos.ch/ -->
 <configuration>
     <!-- logs to console -->
     <appender name="APP" class="ch.qos.logback.core.ConsoleAppender">

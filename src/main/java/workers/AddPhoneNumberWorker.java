@@ -4,10 +4,16 @@ import contactmanager.Contact;
 import contactmanager.PhoneNumber;
 import contactmanager.PhoneNumberManager;
 import gui.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutionException;
+
+import static contactmanager.CheckHelpers.checkContactNotNull;
+import static contactmanager.CheckHelpers.checkDetailsFrameNotNull;
+import static contactmanager.CheckHelpers.checkPhoneNotNull;
 
 /**
  * Worker class for adding contact's phone number to DB
@@ -17,13 +23,12 @@ public class AddPhoneNumberWorker extends SwingWorker<Void, Void> {
     private PhoneNumber phone;
     private DetailsFrame detailsFrame;
 
+    private static final Logger logger = LoggerFactory.getLogger(AddPhoneNumberWorker.class.getName());
+
     public AddPhoneNumberWorker(Contact contact, PhoneNumber phone, DetailsFrame detailsFrame) {
-        if(contact == null) {
-            throw new IllegalArgumentException("Contact is null.");
-        }
-        if(detailsFrame == null) {
-            throw new IllegalArgumentException("Details panel is null.");
-        }
+        checkContactNotNull(contact, logger);
+        checkPhoneNotNull(phone, logger);
+        checkDetailsFrameNotNull(detailsFrame, logger);
 
         this.contact = contact;
         this.phone = phone;
@@ -44,9 +49,11 @@ public class AddPhoneNumberWorker extends SwingWorker<Void, Void> {
             PhoneNumbersTableModel pnmodel = detailsFrame.getPhoneNumbersTableModel();
             pnmodel.addPhoneNumber(phone);
             detailsFrame.clearPhoneData();
-        } catch (InterruptedException e) {
+        } catch (InterruptedException ex) {
+            logger.error("Interrupted exception error.",ex);
             throw new AssertionError();
-        } catch (ExecutionException e) {
+        } catch (ExecutionException ex) {
+            logger.error("Connection error", ex);
             JOptionPane.showMessageDialog(detailsFrame.getMainPanel(),
                     ResourceBundle.getBundle("messages").getString("connectionError"));
         } finally {

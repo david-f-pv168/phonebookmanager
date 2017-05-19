@@ -29,7 +29,7 @@ public class PhoneNumberManagerImplTest {
 
     @Before
     public void setUp() throws java.net.MalformedURLException {
-        ds = DBUtils.createMemoryDatabaseWithTables(false);
+        ds = DBUtils.createDatabaseWithTables(false);
         phoneManager = new PhoneNumberManagerImpl();
         phoneManager.setDataSource(ds);
 

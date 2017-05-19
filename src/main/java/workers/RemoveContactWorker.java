@@ -5,9 +5,14 @@ import contactmanager.ContactManager;
 import gui.ContactsTableModel;
 import gui.Main;
 import gui.MainJFrame;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.swing.*;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutionException;
+import static contactmanager.CheckHelpers.checkContactNotNull;
+import static contactmanager.CheckHelpers.checkMainFrameNotNull;
 
 /**
  * Worker class for removing contact from DB
@@ -15,14 +20,12 @@ import java.util.concurrent.ExecutionException;
 public class RemoveContactWorker extends SwingWorker<Void, Void> {
     private MainJFrame mainJFrame;
     private Contact contact;
+    private static final Logger logger = LoggerFactory.getLogger(RemoveContactWorker.class.getName());
 
     public RemoveContactWorker(Contact contact, MainJFrame mainJFrame) {
-        if(contact == null) {
-            throw new IllegalArgumentException("Contact is null");
-        }
-        if(mainJFrame == null) {
-            throw new IllegalArgumentException("Form is null");
-        }
+        checkContactNotNull(contact, logger);
+        checkMainFrameNotNull(mainJFrame, logger);
+
         this.mainJFrame = mainJFrame;
         this.contact = contact;
     }
@@ -43,9 +46,11 @@ public class RemoveContactWorker extends SwingWorker<Void, Void> {
             JPanel contactDetailsTab = mainJFrame.findContactsTab(contact);
             mainJFrame.getContactsPane().remove(contactDetailsTab);
 
-        } catch (InterruptedException e) {
+        } catch (InterruptedException ex) {
+            logger.error("Interrupted exception error.", ex);
             throw new AssertionError();
-        } catch (ExecutionException e) {
+        } catch (ExecutionException ex) {
+            logger.error("Connection error", ex);
             JOptionPane.showMessageDialog(mainJFrame,
                     ResourceBundle.getBundle("messages").getString("connectionError"));
         } finally {

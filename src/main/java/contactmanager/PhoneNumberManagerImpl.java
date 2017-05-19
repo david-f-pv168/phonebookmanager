@@ -3,46 +3,35 @@ package contactmanager;
 import common.IllegalEntityException;
 import common.ServiceFailureException;
 import common.ValidationException;
-
 import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static contactmanager.CheckHelpers.*;
 
 /**
  * @author  David Frankl
  */
 public class PhoneNumberManagerImpl implements PhoneNumberManager {
 
-	private static final Logger logger = Logger.getLogger(
-			PhoneNumberManagerImpl.class.getName());
-
+	private static final Logger logger = LoggerFactory.getLogger(PhoneNumberManagerImpl.class.getName());
 	private DataSource dataSource;
+	private String msg;
 
 	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
 	}
 
-	private void checkDataSource() {
-		if (dataSource == null) {
-			throw new IllegalStateException("DataSource is not set.");
-		}
-	}
-
 	public List<PhoneNumber> getPhoneNumbers(Contact contact) {
-		checkDataSource();
+		checkDataSourceNotNull(dataSource, logger);
 		Connection connection = null;
 		PreparedStatement st = null;
 
-		if (contact == null) {
-			throw new IllegalArgumentException("Contact is null.");
-		}
-
-		if (contact.getID() == null) {
-			throw new IllegalEntityException("Contact ID is null.");
-		}
+		checkContactNotNull(contact, logger);
+		checkContactIDNotNull(contact, logger);
 
 		try {
 			connection = dataSource.getConnection();
@@ -51,8 +40,8 @@ public class PhoneNumberManagerImpl implements PhoneNumberManager {
 			st.setLong(1, contact.getID());
 			return executeQueryForMultiplePhones(st);
 		} catch (SQLException ex) {
-			String msg = String.format("Error when getting all phones from DB for contact %s", contact.getFirstName());
-			logger.log(Level.SEVERE, msg, ex);
+			msg = String.format("Error when getting all phones from DB for contact %s", contact.getFirstName());
+			logger.error(msg, ex);
 			throw new ServiceFailureException(msg, ex);
 		} finally {
 			DBUtils.closeQuietly(connection, st);
@@ -60,10 +49,12 @@ public class PhoneNumberManagerImpl implements PhoneNumberManager {
 	}
 
 	public PhoneNumber getPhoneNumber(Long ID) {
-		checkDataSource();
+		checkDataSourceNotNull(dataSource, logger);
 
 		if (ID == null) {
-			throw new IllegalArgumentException("ID is null.");
+			String errText = "Phone ID is null.";
+			logger.error(errText);
+			throw new IllegalArgumentException(errText);
 		}
 
 		Connection connection = null;
@@ -75,8 +66,8 @@ public class PhoneNumberManagerImpl implements PhoneNumberManager {
 			statement.setLong(1, ID);
 			return executeQueryForSinglePhone(statement);
 		} catch (SQLException ex) {
-			String msg = "Error when getting phone with ID: " + ID + " from the DB.";
-			logger.log(Level.SEVERE, msg, ex);
+			msg = "Error when getting phone with ID: " + ID + " from the DB.";
+			logger.error(msg, ex);
 			throw new ServiceFailureException(msg, ex);
 		} finally {
 			DBUtils.closeQuietly(connection, statement);
@@ -84,19 +75,16 @@ public class PhoneNumberManagerImpl implements PhoneNumberManager {
 	}
 
 	public void addPhone(Contact contact, PhoneNumber phone) {
-		checkDataSource();
+		checkDataSourceNotNull(dataSource, logger);
 		validatePhone(phone);
 
-		if (contact == null) {
-			throw new IllegalArgumentException("Contact is null.");
-		}
+		checkContactNotNull(contact, logger);
+		checkContactIDNotNull(contact, logger);
 
 		if (phone.getID() != null) {
-			throw new IllegalEntityException("Phone ID is already set.");
-		}
-
-		if (contact.getID() == null) {
-			throw new IllegalEntityException("Contact ID is null.");
+			String errText = "Phone ID is already set.";
+			logger.error(errText);
+			throw new IllegalEntityException(errText);
 		}
 
 		Connection connection = null;
@@ -115,14 +103,15 @@ public class PhoneNumberManagerImpl implements PhoneNumberManager {
 			st.setLong(4, contact.getID());
 
 			int count = st.executeUpdate();
-			DBUtils.checkUpdatesCount(count, contact, true);
+			DBUtils.checkUpdatesCount(count, phone, true);
 
 			Long id = DBUtils.getId(st.getGeneratedKeys());
 			phone.setID(id);
 			connection.commit();
+			logger.info("Added phone with ID: " + phone.getID().toString());
 		} catch (SQLException ex) {
-			String msg = String.format("Error when inserting contact %s into DB.", contact.getFirstName());
-			logger.log(Level.SEVERE, msg, ex);
+			msg = String.format("Error when inserting %s's phone into DB.", contact.getFirstName());
+			logger.error(msg, ex);
 			throw new ServiceFailureException(msg, ex);
 		} finally {
 			DBUtils.doRollbackQuietly(connection);
@@ -131,12 +120,12 @@ public class PhoneNumberManagerImpl implements PhoneNumberManager {
 	}
 
 	public void removePhone(PhoneNumber phone) {
-		checkDataSource();
-		if (phone == null) {
-			throw new IllegalArgumentException("Phone is null.");
-		}
+		checkDataSourceNotNull(dataSource, logger);
+		checkPhoneNotNull(phone, logger);
 		if (phone.getID() == null) {
-			throw new IllegalEntityException("Phone ID is null.");
+			String errText = "Phone ID is null.";
+			logger.error(errText);
+			throw new IllegalEntityException(errText);
 		}
 		Connection connection = null;
 		PreparedStatement st = null;
@@ -152,9 +141,10 @@ public class PhoneNumberManagerImpl implements PhoneNumberManager {
 			int count = st.executeUpdate();
 			DBUtils.checkUpdatesCount(count, phone, false);
 			connection.commit();
+			logger.info("Removed phone with ID: " + phone.getID().toString());
 		} catch (SQLException ex) {
-			String msg = "Error when deleting phone from the DB";
-			logger.log(Level.SEVERE, msg, ex);
+			msg = "Error when deleting phone from the DB";
+			logger.error(msg, ex);
 			throw new ServiceFailureException(msg, ex);
 		} finally {
 			DBUtils.doRollbackQuietly(connection);
@@ -163,11 +153,13 @@ public class PhoneNumberManagerImpl implements PhoneNumberManager {
 	}
 
 	public void updatePhone(PhoneNumber phone) {
-		checkDataSource();
+		checkDataSourceNotNull(dataSource, logger);
 		validatePhone(phone);
 
 		if (phone.getID() == null) {
-			throw new IllegalEntityException("Phone ID is null.");
+			String errText = "Phone ID is null.";
+			logger.error(errText);
+			throw new IllegalEntityException(errText);
 		}
 		Connection connection = null;
 		PreparedStatement st = null;
@@ -186,9 +178,10 @@ public class PhoneNumberManagerImpl implements PhoneNumberManager {
 			int count = st.executeUpdate();
 			DBUtils.checkUpdatesCount(count, phone, false);
 			connection.commit();
+			logger.info("Updated phone with ID: " + phone.getID().toString());
 		} catch (SQLException ex) {
-			String msg = "Error when updating phone in the DB.";
-			logger.log(Level.SEVERE, msg, ex);
+			msg = "Error when updating phone in the DB.";
+			logger.error(msg, ex);
 			throw new ServiceFailureException(msg, ex);
 		} finally {
 			DBUtils.doRollbackQuietly(connection);
@@ -199,14 +192,12 @@ public class PhoneNumberManagerImpl implements PhoneNumberManager {
 	/**
 	 * Validates phone.
 	 *
-	 * @param phone: Contact to be validated.
-	 * @throws IllegalArgumentException if contact is null.
+	 * @param phone: Phone to be validated.
+	 * @throws IllegalArgumentException if phone is null.
 	 * @throws ValidationException if either phone number or country code is null.
 	 */
 	public void validatePhone(PhoneNumber phone) {
-		if (phone == null) {
-			throw new IllegalArgumentException("Phone is null.");
-		}
+		checkPhoneNotNull(phone, logger);
 
 		if (phone.getNumber() == null || phone.getCountryCode() == null) {
 			throw new ValidationException("Either phone number or country code is null.");
@@ -218,9 +209,12 @@ public class PhoneNumberManagerImpl implements PhoneNumberManager {
 		if (set.next()) {
 			PhoneNumber phone = rowToPhoneNumber(set);
 			if (set.next()) {
-				throw new ServiceFailureException(
-						"DB integrity error: two or more contacts have the same ID");
+				String msg = "DB integrity error: two or more contacts have the same ID";
+				logger.error(msg);
+				throw new ServiceFailureException(msg);
 			}
+
+			logger.info("Retrieved phone with ID: " + phone.getID().toString());
 			return phone;
 		} else {
 			return null;
@@ -234,6 +228,8 @@ public class PhoneNumberManagerImpl implements PhoneNumberManager {
 		while (set.next()) {
 			phones.add(rowToPhoneNumber(set));
 		}
+
+		logger.info(String.format("Retrieved %d phone numbers", phones.size()));
 		return phones;
 	}
 

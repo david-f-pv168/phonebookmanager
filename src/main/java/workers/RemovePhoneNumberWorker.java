@@ -5,9 +5,15 @@ import contactmanager.PhoneNumberManager;
 import gui.DetailsFrame;
 import gui.Main;
 import gui.PhoneNumbersTableModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.swing.*;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutionException;
+
+import static contactmanager.CheckHelpers.checkDetailsFrameNotNull;
+import static contactmanager.CheckHelpers.checkPhoneNotNull;
 
 /**
  * Worker class for removing contact from DB
@@ -15,14 +21,12 @@ import java.util.concurrent.ExecutionException;
 public class RemovePhoneNumberWorker extends SwingWorker<Void, Void> {
     private DetailsFrame detailsFrame;
     private PhoneNumber phone;
+    private static final Logger logger = LoggerFactory.getLogger(RemovePhoneNumberWorker.class.getName());
 
     public RemovePhoneNumberWorker(PhoneNumber phone, DetailsFrame detailsFrame) {
-        if(phone == null) {
-            throw new IllegalArgumentException("Phone is null");
-        }
-        if(detailsFrame == null) {
-            throw new IllegalArgumentException("Form is null");
-        }
+        checkPhoneNotNull(phone, logger);
+        checkDetailsFrameNotNull(detailsFrame, logger);
+
         this.detailsFrame = detailsFrame;
         this.phone = phone;
     }

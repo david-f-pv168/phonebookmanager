@@ -1,6 +1,7 @@
 package gui;
 
 import contactmanager.*;
+
 import javax.sql.DataSource;
 import java.awt.*;
 import java.time.Clock;
@@ -25,7 +26,7 @@ public class Main {
 
     private synchronized static DataSource getDB() {
         if (db == null) {
-            db = DBUtils.createMemoryDatabaseWithTables(true);
+            db = DBUtils.createDatabaseWithTables(true);
         }
 
         return db;

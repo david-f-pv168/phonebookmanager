@@ -36,7 +36,7 @@ public class ContactManagerImplTest {
 
     @Before
     public void setUp() throws java.net.MalformedURLException {
-        ds = DBUtils.createMemoryDatabaseWithTables(false);
+        ds = DBUtils.createDatabaseWithTables(false);
         contactManager = new ContactManagerImpl(Clock.fixed(prepareClockMock(NOW), ZoneId.of("UTC")));
         contactManager.setDataSource(ds);
 
