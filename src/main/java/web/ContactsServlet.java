@@ -24,11 +24,11 @@ public class ContactsServlet extends HttpServlet {
     private static final String LIST_JSP = "/list.jsp";
     public static final String URL_MAPPING = "/contacts";
 
-    private final static Logger log = LoggerFactory.getLogger(ContactsServlet.class);
+    private final static Logger logger = LoggerFactory.getLogger(ContactsServlet.class);
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        log.debug("GET ...");
+        logger.debug("GET ...");
         showContactsList(request, response);
     }
 
@@ -38,7 +38,7 @@ public class ContactsServlet extends HttpServlet {
         request.setCharacterEncoding("utf-8");
         //action specified by pathInfo
         String action = request.getPathInfo();
-        log.debug("POST ... {}",action);
+        logger.debug("POST ... {}",action);
         switch (action) {
             case "/add":
                 //getting POST parameters from form
@@ -51,7 +51,7 @@ public class ContactsServlet extends HttpServlet {
                 //form data validity check
                 if (firstName == null || firstName.length() == 0 && surname == null || surname.length() == 0) {
                     request.setAttribute("validation_error", "Please fill in first name or surname.");
-                    log.debug("form data invalid");
+                    logger.debug("form data invalid");
                     showContactsList(request, response);
                     return;
                 }
@@ -67,11 +67,11 @@ public class ContactsServlet extends HttpServlet {
                     getContactManager().createContact(contact);
 
                     //redirect-after-POST protects from multiple submission
-                    log.debug("redirecting after POST");
+                    logger.debug("redirecting after POST");
                     response.sendRedirect(request.getContextPath()+URL_MAPPING);
                     return;
                 } catch (ServiceFailureException ex) {
-                    log.error("Cannot create contact. Please try again.", ex);
+                    logger.error("Cannot create contact. Please try again.", ex);
                     response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage());
                     return;
                 }
@@ -80,11 +80,11 @@ public class ContactsServlet extends HttpServlet {
                     Long ID = Long.valueOf(request.getParameter("id"));
                     Contact contact = getContactManager().getContact(ID);
                     getContactManager().deleteContact(contact);
-                    log.debug("redirecting after POST");
+                    logger.debug("redirecting after POST");
                     response.sendRedirect(request.getContextPath()+URL_MAPPING);
                     return;
                 } catch (ServiceFailureException ex) {
-                    log.error("Cannot delete book", ex);
+                    logger.error("Cannot delete book", ex);
                     response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage());
                     return;
                 }
@@ -92,7 +92,7 @@ public class ContactsServlet extends HttpServlet {
                 //TODO
                 return;
             default:
-                log.error("Unknown action " + action);
+                logger.error("Unknown action " + action);
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, "Unknown action " + action);
         }
     }
@@ -111,11 +111,11 @@ public class ContactsServlet extends HttpServlet {
      */
     private void showContactsList(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
-            log.debug("showing table of contacts");
+            logger.debug("showing table of contacts");
             request.setAttribute("contacts", getContactManager().findAllContacts());
             request.getRequestDispatcher(LIST_JSP).forward(request, response);
         } catch (ServiceFailureException ex) {
-            log.error("Cannot display contacts", ex);
+            logger.error("Cannot display contacts", ex);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage());
         }
     }

@@ -13,7 +13,7 @@ import java.util.Objects;
 
 public class ContactsTableModel extends AbstractTableModel {
 
-    final static Logger log = LoggerFactory.getLogger(ContactsTableModel.class);
+    private final static Logger logger = LoggerFactory.getLogger(ContactsTableModel.class);
 
     private List<Contact> contacts = new ArrayList<>();
 
@@ -43,7 +43,9 @@ public class ContactsTableModel extends AbstractTableModel {
                 return cont;
             }
         }
-        throw new IllegalArgumentException("Contact with ID " + ID.toString() + "was not found.");
+        String msg = "Contact with ID " + ID.toString() + "was not found.";
+        logger.error(msg);
+        throw new IllegalArgumentException(msg);
     }
 
     public void editContact(Contact editedContact) {
@@ -58,7 +60,7 @@ public class ContactsTableModel extends AbstractTableModel {
     }
 
     public Contact getContactAt(int index) {
-        return contacts.get(index);//TODO :
+        return contacts.get(index);
     }
 
     public void addContact(Contact contact) {

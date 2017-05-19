@@ -11,7 +11,7 @@ import java.util.function.Function;
 
 public class PhoneNumbersTableModel extends AbstractTableModel {
 
-    final static Logger logger = LoggerFactory.getLogger(PhoneNumbersTableModel.class);
+    private final static Logger logger = LoggerFactory.getLogger(PhoneNumbersTableModel.class);
 
     private List<PhoneNumber> phones = new ArrayList<>();
 
@@ -51,7 +51,7 @@ public class PhoneNumbersTableModel extends AbstractTableModel {
     }
 
     public PhoneNumber getPhoneNumberAt(int index) {
-        return phones.get(index);//TODO :
+        return phones.get(index);
     }
 
     public void addPhoneNumber(PhoneNumber phone) {

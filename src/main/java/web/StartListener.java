@@ -14,22 +14,22 @@ import java.time.Clock;
 @WebListener
 public class StartListener implements ServletContextListener {
 
-    private final static Logger log = LoggerFactory.getLogger(StartListener.class);
+    private final static Logger logger = LoggerFactory.getLogger(StartListener.class);
 
     @Override
     public void contextInitialized(ServletContextEvent ev) {
-        log.info("Web app initialised");
+        logger.info("Web app initialised");
         ServletContext servletContext = ev.getServletContext();
         ContactManagerImpl contactManager = new ContactManagerImpl(Clock.systemDefaultZone());
 
         contactManager.setDataSource(DBUtils.createDatabaseWithTables(true));
 
         servletContext.setAttribute("contactManager", contactManager);
-        log.info("Contact manager created and stored to servletContext.");
+        logger.info("Contact manager created and stored to servletContext.");
     }
 
     @Override
     public void contextDestroyed(ServletContextEvent ev) {
-        log.info("The application closes.");
+        logger.info("The application closes.");
     }
 }

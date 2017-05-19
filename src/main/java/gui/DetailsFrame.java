@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import workers.*;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -28,7 +27,7 @@ public class DetailsFrame extends JFrame {
     private JTextField contactPrimaryEmailTextField;
     private JDatePickerImpl contactBirthdayDatePicker;
     private JTable phonesTable;
-    private JTextField phoneTypeTextField;
+    private JComboBox<RBComboItemPhoneType> phoneTypeComboBox;
     private JTextField phoneNumberTextField;
     private JTextField phoneCountryCodeTextField;
     private JButton contactSaveButton;
@@ -37,6 +36,7 @@ public class DetailsFrame extends JFrame {
     private JButton phoneNumberUpsertButton;
     private JButton phoneNumberEditButton;
     private JButton phoneNumberDeleteButton;
+    private JLabel firstNameLabel;
     private JLabel surnameLabel;
     private JLabel emailLabel;
     private JLabel birthdayLabel;
@@ -44,19 +44,17 @@ public class DetailsFrame extends JFrame {
     private JLabel numberLabel;
     private JLabel countryCodeLabel;
     private JButton xButton;
-    private JLabel firstNameLabel;
-
 
     private Contact contact;
     private Long phoneInEditID;
     private static final Logger logger = LoggerFactory.getLogger(DetailsFrame.class.getName());
-    private ResourceBundle rb_messages;
-    private ResourceBundle rb_gui;
+    private ResourceBundle rbMessages;
+    private ResourceBundle rbGui;
     public final static String FrameID = "FrameID";
 
     public DetailsFrame(JTabbedPane parentPane) {
-        rb_messages = ResourceBundle.getBundle("messages");
-        rb_gui = ResourceBundle.getBundle("gui_names");
+        rbMessages = ResourceBundle.getBundle("messages");
+        rbGui = ResourceBundle.getBundle("gui_names");
 
         phonesTable.setModel(new PhoneNumbersTableModel());
         phonesTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -64,6 +62,14 @@ public class DetailsFrame extends JFrame {
         phonesTable.getTableHeader().setReorderingAllowed(false);
         phonesTable.getTableHeader().setReorderingAllowed(false);
         phonesTable.getTableHeader().setDefaultRenderer(new TableHeaderRenderer(phonesTable));
+
+        phoneTypeComboBox.addItem(new RBComboItemPhoneType("FAMILY"));
+        phoneTypeComboBox.addItem(new RBComboItemPhoneType("FRIENDS"));
+        phoneTypeComboBox.addItem(new RBComboItemPhoneType("WORK"));
+        RBComboItemPhoneType nullRBComboItemPhoneType = new RBComboItemPhoneType(null);
+        phoneTypeComboBox.addItem(nullRBComboItemPhoneType);
+        phoneTypeComboBox.setSelectedItem(nullRBComboItemPhoneType);
+        phoneTypeComboBox.setEditable(false);
 
         xButton.addActionListener(e -> {
             parentPane.remove(mainPanel);
@@ -85,20 +91,20 @@ public class DetailsFrame extends JFrame {
     }
 
     private void repaintTitledComponents() {
-        contactSaveButton.setText(rb_gui.getString("SAVE_CONTACT"));
-        contactEditButton.setText(rb_gui.getString("EDIT_CONTACT"));
-        clearPhoneDataButton.setText(rb_gui.getString("CLEAR_DATA"));
-        phoneNumberUpsertButton.setText(rb_gui.getString("ADD_PHONE"));
-        phoneNumberEditButton.setText(rb_gui.getString("EDIT_PHONE"));
-        phoneNumberDeleteButton.setText(rb_gui.getString("DELETE_PHONE"));
+        contactSaveButton.setText(rbGui.getString("SAVE_CONTACT"));
+        contactEditButton.setText(rbGui.getString("EDIT_CONTACT"));
+        clearPhoneDataButton.setText(rbGui.getString("CLEAR_DATA"));
+        phoneNumberUpsertButton.setText(rbGui.getString("ADD_PHONE"));
+        phoneNumberEditButton.setText(rbGui.getString("EDIT_PHONE"));
+        phoneNumberDeleteButton.setText(rbGui.getString("DELETE_PHONE"));
 
-        firstNameLabel.setText(rb_gui.getString("FIRST_NAME"));
-        surnameLabel.setText(rb_gui.getString("SURNAME"));
-        emailLabel.setText(rb_gui.getString("PRIMARY_EMAIL"));
-        birthdayLabel.setText(rb_gui.getString("BIRTHDAY"));
-        typeLabel.setText(rb_gui.getString("CONTACT_TYPE"));
-        numberLabel.setText(rb_gui.getString("NUMBER"));
-        countryCodeLabel.setText(rb_gui.getString("COUNTRY_CODE"));
+        firstNameLabel.setText(rbGui.getString("FIRST_NAME"));
+        surnameLabel.setText(rbGui.getString("SURNAME"));
+        emailLabel.setText(rbGui.getString("PRIMARY_EMAIL"));
+        birthdayLabel.setText(rbGui.getString("BIRTHDAY"));
+        typeLabel.setText(rbGui.getString("CONTACT_TYPE"));
+        numberLabel.setText(rbGui.getString("NUMBER"));
+        countryCodeLabel.setText(rbGui.getString("COUNTRY_CODE"));
     }
 
     public PhoneNumbersTableModel getPhoneNumbersTableModel() {
@@ -140,7 +146,7 @@ public class DetailsFrame extends JFrame {
     private void phoneNumberDeleteButtonPressed() {
         int selectedRow = phonesTable.getSelectedRow();
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(phoneNumberDeleteButton, rb_messages.getString("NO_ROW_SELECTED"));
+            JOptionPane.showMessageDialog(phoneNumberDeleteButton, rbMessages.getString("NO_ROW_SELECTED"));
             return;
         }
 
@@ -155,7 +161,7 @@ public class DetailsFrame extends JFrame {
     private void phoneNumberEditButtonPressed() {
         int selectedRow = phonesTable.getSelectedRow();
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(phoneNumberDeleteButton, rb_messages.getString("NO_ROW_SELECTED"));
+            JOptionPane.showMessageDialog(phoneNumberDeleteButton, rbMessages.getString("NO_ROW_SELECTED"));
             return;
         }
         setEditMode(true);
@@ -163,7 +169,7 @@ public class DetailsFrame extends JFrame {
         PhoneNumber phone = getPhoneNumbersTableModel().getPhoneNumberAt(selectedRow);
         phoneCountryCodeTextField.setText(phone.getCountryCode());
         phoneNumberTextField.setText(phone.getNumber());
-        phoneTypeTextField.setText(phone.getPhoneType());
+        phoneTypeComboBox.setSelectedItem(new RBComboItemPhoneType(phone.getPhoneType()));
         phoneInEditID = phone.getID();
     }
 
@@ -181,7 +187,7 @@ public class DetailsFrame extends JFrame {
             return;
         }
 
-        if (phoneNumberUpsertButton.getText().equals(rb_gui.getString("CONFIRM_EDIT"))) {
+        if (phoneNumberUpsertButton.getText().equals(rbGui.getString("CONFIRM_EDIT"))) {
             phone.setID(phoneInEditID);
             new EditPhoneNumberWorker(phone, this).execute();
         } else {
@@ -199,7 +205,7 @@ public class DetailsFrame extends JFrame {
         return new PhoneNumber.Builder()
                 .countryCode(getNonEmptyTextOrNull(phoneCountryCodeTextField))
                 .number(getNonEmptyTextOrNull(phoneNumberTextField))
-                .phoneType(getNonEmptyTextOrNull(phoneTypeTextField))
+                .phoneType(((RBComboItemPhoneType) phoneTypeComboBox.getSelectedItem()).getValue())
                 .build();
     }
 
@@ -213,7 +219,7 @@ public class DetailsFrame extends JFrame {
     public void clearPhoneData() {
         phoneCountryCodeTextField.setText("");
         phoneNumberTextField.setText("");
-        phoneTypeTextField.setText("");
+        phoneTypeComboBox.setSelectedItem(new RBComboItemPhoneType(null));
     }
 
     public void setContact(Contact contact) {
@@ -235,11 +241,11 @@ public class DetailsFrame extends JFrame {
 
     public void setEditMode(Boolean inEditMode) {
         if (inEditMode) {
-            clearPhoneDataButton.setText(rb_gui.getString("CANCEL_EDIT"));
-            phoneNumberUpsertButton.setText(rb_gui.getString("CONFIRM_EDIT"));
+            clearPhoneDataButton.setText(rbGui.getString("CANCEL_EDIT"));
+            phoneNumberUpsertButton.setText(rbGui.getString("CONFIRM_EDIT"));
         } else {
-            clearPhoneDataButton.setText(rb_gui.getString("CLEAR_DATA"));
-            phoneNumberUpsertButton.setText(rb_gui.getString("ADD_PHONE"));
+            clearPhoneDataButton.setText(rbGui.getString("CLEAR_DATA"));
+            phoneNumberUpsertButton.setText(rbGui.getString("ADD_PHONE"));
         }
     }
 
@@ -250,9 +256,9 @@ public class DetailsFrame extends JFrame {
         contactBirthdayDatePicker.getComponent(1).setEnabled(value);
 
         if (contactFirstNameTextField.isEnabled()) {
-            contactEditButton.setText(rb_gui.getString("CANCEL_EDIT"));
+            contactEditButton.setText(rbGui.getString("CANCEL_EDIT"));
         } else {
-            contactEditButton.setText(rb_gui.getString("EDIT_CONTACT"));
+            contactEditButton.setText(rbGui.getString("EDIT_CONTACT"));
         }
     }
 
