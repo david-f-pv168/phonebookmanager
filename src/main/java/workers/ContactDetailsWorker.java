@@ -58,7 +58,7 @@ public class ContactDetailsWorker extends SwingWorker<List<PhoneNumber>, Void> {
             throw new AssertionError();
         } catch (ExecutionException ex) {
             logger.error("Connection error", ex);
-            JOptionPane.showMessageDialog(mainJFrame, ResourceBundle.getBundle("messages").getString("connectionError"));
+            JOptionPane.showMessageDialog(mainJFrame, ResourceBundle.getBundle("messages").getString("CONNECTION_ERROR"));
         }
     }
 }

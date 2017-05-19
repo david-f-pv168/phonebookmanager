@@ -14,7 +14,7 @@ import java.util.concurrent.ExecutionException;
 import static contactmanager.CheckHelpers.checkMainFrameNotNull;
 
 /**
- * Worker class for getting Customer data from DB
+ * Worker class for getting Contact data from DB
  */
 public class ContactDownloadWorker extends SwingWorker<List<Contact>, Void> {
     private MainJFrame mainJFrame;
@@ -42,7 +42,7 @@ public class ContactDownloadWorker extends SwingWorker<List<Contact>, Void> {
             throw new AssertionError();
         } catch (ExecutionException ex) {
             logger.error("Connection error", ex);
-            JOptionPane.showMessageDialog(mainJFrame, ResourceBundle.getBundle("messages").getString("connectionError"));
+            JOptionPane.showMessageDialog(mainJFrame, ResourceBundle.getBundle("messages").getString("CONNECTION_ERROR"));
         }
         mainJFrame.setContactsButtonsEnabled(true);
     }

@@ -35,12 +35,14 @@ public class MainJFrame extends JFrame{
     private JButton searchByPhoneButton;
     private JButton searchByNameButton;
 
+    private ResourceBundle rb_messages;
+    private ResourceBundle rb_gui;
     public enum SearchType {NAME, PHONE}
 
     public MainJFrame() {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setContentPane(mainPanel);
-        setTitle("Contacts");
+        setTitle("Contact manager");
         pack();
         setLocationRelativeTo(null);
         setVisible(true);
@@ -60,10 +62,29 @@ public class MainJFrame extends JFrame{
 
         searchByNameButton.addActionListener(event1 -> searchByNameButtonPressed());
         searchByPhoneButton.addActionListener(event -> searchByPhoneButtonPressed());
+
+        rb_messages = ResourceBundle.getBundle("messages");
+        rb_gui = ResourceBundle.getBundle("gui_names");
+        repaintTitledComponents();
     }
 
     private void createUIComponents() {
         contactBirthdayDatePicker = guiUtils.createDatePicker();
+    }
+
+    private void repaintTitledComponents() {
+        contactsPane.setTitleAt(0, rb_gui.getString("CONTACTS"));
+        contactDetailsButton.setText(rb_gui.getString("CONTACT_DETAILS"));
+        contactDeleteButton.setText(rb_gui.getString("DELETE_CONTACT"));
+        searchByNameButton.setText(rb_gui.getString("FILTER_NAME"));
+        searchByPhoneButton.setText(rb_gui.getString("FILTER_PHONE"));
+        contactAddButton.setText(rb_gui.getString("ADD_CONTACT"));
+        clearDataButton.setText(rb_gui.getString("CLEAR_DATA"));
+
+        nameLabel.setText(rb_gui.getString("FIRST_NAME"));
+        surnameLabel.setText(rb_gui.getString("SURNAME"));
+        emailLabel.setText(rb_gui.getString("PRIMARY_EMAIL"));
+        birthdayLabel.setText(rb_gui.getString("BIRTHDAY"));
     }
 
     public ContactsTableModel getContactsTableModel() {
@@ -82,7 +103,7 @@ public class MainJFrame extends JFrame{
     private void contactDetailsButtonPressed() {
         int selectedRow = contactsTable.getSelectedRow();
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(contactDeleteButton, ResourceBundle.getBundle("messages").getString("noDataSelected"));
+            JOptionPane.showMessageDialog(contactDeleteButton, rb_messages.getString("NO_ROW_SELECTED"));
             return;
         }
 
@@ -100,7 +121,7 @@ public class MainJFrame extends JFrame{
     private void contactDeleteButtonPressed() {
         int selectedRow = contactsTable.getSelectedRow();
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(contactDeleteButton, ResourceBundle.getBundle("messages").getString("noDataSelected"));
+            JOptionPane.showMessageDialog(contactDeleteButton, rb_messages.getString("NO_ROW_SELECTED"));
             return;
         }
 

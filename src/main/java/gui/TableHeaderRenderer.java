@@ -1,20 +1,16 @@
 package gui;
 
-/**
- * Created by David on 14-May-17.
- */
-
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.util.ResourceBundle;
 
 /**
- * Renderer class for viewing translator table head
+ * Renderer class for viewing Contacts table head
  */
 public class TableHeaderRenderer extends DefaultTableCellRenderer {
 
-    DefaultTableCellRenderer renderer;
+    private DefaultTableCellRenderer renderer;
 
     public TableHeaderRenderer(JTable table) {
         renderer = (DefaultTableCellRenderer) table.getTableHeader().getDefaultRenderer();
@@ -25,7 +21,7 @@ public class TableHeaderRenderer extends DefaultTableCellRenderer {
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
                                                    boolean hasFocus, int row, int column) {
         Component comp = renderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-        renderer.setText((ResourceBundle.getBundle("GUI_names").getString((String)value)));
+        renderer.setText((ResourceBundle.getBundle("gui_names").getString((String)value)));
         return comp;
     }
 }

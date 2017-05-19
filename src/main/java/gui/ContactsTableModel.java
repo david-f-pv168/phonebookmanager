@@ -10,10 +10,6 @@ import java.util.function.Function;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * Created by David on 14-May-17.
- */
-
 
 public class ContactsTableModel extends AbstractTableModel {
 

@@ -52,7 +52,7 @@ public class RemoveContactWorker extends SwingWorker<Void, Void> {
         } catch (ExecutionException ex) {
             logger.error("Connection error", ex);
             JOptionPane.showMessageDialog(mainJFrame,
-                    ResourceBundle.getBundle("messages").getString("connectionError"));
+                    ResourceBundle.getBundle("messages").getString("CONNECTION_ERROR"));
         } finally {
             mainJFrame.setContactsButtonsEnabled(true);
         }

@@ -8,9 +8,6 @@ import org.jdatepicker.impl.UtilDateModel;
 import javax.swing.*;
 import java.util.Properties;
 
-/**
- * Created by David on 18-May-17.
- */
 public class guiUtils {
 
     /**

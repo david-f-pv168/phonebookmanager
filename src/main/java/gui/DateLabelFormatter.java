@@ -5,9 +5,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-/**
- * Created by David on 16-May-17.
- */
 public class DateLabelFormatter extends JFormattedTextField.AbstractFormatter {
 
     private String datePattern = "yyyy-MM-dd";

@@ -48,7 +48,7 @@ public class RemovePhoneNumberWorker extends SwingWorker<Void, Void> {
             throw new AssertionError();
         } catch (ExecutionException e) {
             JOptionPane.showMessageDialog(detailsFrame.getMainPanel(),
-                    ResourceBundle.getBundle("messages").getString("connectionError"));
+                    ResourceBundle.getBundle("messages").getString("CONNECTION_ERROR"));
         } finally {
             detailsFrame.setPhoneNumbersButtonsEnabled(true);
         }

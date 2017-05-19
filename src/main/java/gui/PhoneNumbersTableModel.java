@@ -9,25 +9,16 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
-
-/**
- * Created by David on 16-May-17.
- */
 public class PhoneNumbersTableModel extends AbstractTableModel {
 
-    final static Logger log = LoggerFactory.getLogger(PhoneNumbersTableModel.class);
+    final static Logger logger = LoggerFactory.getLogger(PhoneNumbersTableModel.class);
 
     private List<PhoneNumber> phones = new ArrayList<>();
-
-    public void setPhones(List<PhoneNumber> phones) {
-        this.phones = phones;
-        fireTableDataChanged();
-    }
 
     private enum Column {
         COUNTRY_CODE(String.class, PhoneNumber::getCountryCode),
         NUMBER(String.class, PhoneNumber::getNumber),
-        PHONE_TYPE(String.class, PhoneNumber::getPhoneType);
+        CONTACT_TYPE(String.class, PhoneNumber::getPhoneType);
 
         private Class<?> type;
         private Function<PhoneNumber, ?> dataFunction;
@@ -44,7 +35,9 @@ public class PhoneNumbersTableModel extends AbstractTableModel {
                 return phone;
             }
         }
-        throw new IllegalArgumentException("Phone with ID " + ID.toString() + "was not found.");
+        String msg = "Phone with ID " + ID.toString() + "was not found.";
+        logger.error(msg);
+        throw new IllegalArgumentException(msg);
     }
 
     public void editPhoneNumber(PhoneNumber editedPhone) {

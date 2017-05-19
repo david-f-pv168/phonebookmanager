@@ -6,10 +6,6 @@ import javax.sql.DataSource;
 import java.awt.*;
 import java.time.Clock;
 
-/**
- * Created by David Frankl on 14-May-17.
- *
- */
 public class Main {
     private static DataSource db;
     private static ContactManagerImpl contactManager;

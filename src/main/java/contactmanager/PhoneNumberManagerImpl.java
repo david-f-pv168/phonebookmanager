@@ -7,6 +7,8 @@ import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -200,7 +202,7 @@ public class PhoneNumberManagerImpl implements PhoneNumberManager {
 		checkPhoneNotNull(phone, logger);
 
 		if (phone.getNumber() == null || phone.getCountryCode() == null) {
-			throw new ValidationException("Either phone number or country code is null.");
+			throw new ValidationException(ResourceBundle.getBundle("messages").getString("CODE_NUMBER_EMPTY"));
 		}
 	}
 

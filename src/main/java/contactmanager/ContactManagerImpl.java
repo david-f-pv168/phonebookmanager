@@ -9,6 +9,8 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -252,13 +254,15 @@ public class ContactManagerImpl implements ContactManager {
 	public void validateContact(Contact contact) {
 		checkContactNotNull(contact, logger);
 
+		ResourceBundle bundle = ResourceBundle.getBundle("messages");
+
 		if (contact.getFirstName() == null && contact.getSurname() == null) {
-			throw new ValidationException("Both first name and surname is null");
+			throw new ValidationException(bundle.getString("EMPTY_NAMES"));
 		}
 
 		LocalDate today = LocalDate.now(clock);
 		if (contact.getBirthday() != null && contact.getBirthday().isAfter(today)) {
-			throw new ValidationException("Birthday is in future");
+			throw new ValidationException(bundle.getString("BIRTHDAY_PAST_TODAY"));
 		}
 	}
 
