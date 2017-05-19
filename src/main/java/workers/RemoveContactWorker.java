@@ -40,6 +40,9 @@ public class RemoveContactWorker extends SwingWorker<Void, Void> {
             get();
             ContactsTableModel model = mainJFrame.getContactsTableModel();
             model.removeContact(contact);
+            JPanel contactDetailsTab = mainJFrame.findContactsTab(contact);
+            mainJFrame.getContactsPane().remove(contactDetailsTab);
+
         } catch (InterruptedException e) {
             throw new AssertionError();
         } catch (ExecutionException e) {

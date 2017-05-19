@@ -3,10 +3,7 @@ package gui;
 import common.ValidationException;
 import contactmanager.Contact;
 import org.jdatepicker.impl.JDatePickerImpl;
-import workers.AddContactWorker;
-import workers.ContactDetailsWorker;
-import workers.ContactDownloadWorker;
-import workers.RemoveContactWorker;
+import workers.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -34,17 +31,19 @@ public class MainJFrame extends JFrame{
     private JDatePickerImpl contactBirthdayDatePicker;
     private JButton contactAddButton;
     private JButton clearDataButton;
+    private JTextField searchByPhoneTextField;
+    private JTextField searchByNameTextField;
+    private JButton searchByPhoneButton;
+    private JButton searchByNameButton;
 
+    public enum SearchType {NAME, PHONE}
 
     public MainJFrame() {
-        init();
-    }
-
-    public void init() {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setContentPane(mainPanel);
         setTitle("Contacts");
         pack();
+        setLocationRelativeTo(null);
         setVisible(true);
 
         new ContactDownloadWorker(this).execute();
@@ -59,6 +58,9 @@ public class MainJFrame extends JFrame{
         contactsTable.setVisible(true);
         contactsTable.getTableHeader().setReorderingAllowed(false);
         contactsTable.getTableHeader().setDefaultRenderer(new TableHeaderRenderer(contactsTable));
+
+        searchByNameButton.addActionListener(this:: searchByNameButtonPressed);
+        searchByPhoneButton.addActionListener(this:: searchByPhoneButtonPressed);
     }
 
     /**
@@ -120,15 +122,19 @@ public class MainJFrame extends JFrame{
         clearNewContactData();
     }
 
-    private Contact getContactFromAddForm() {
-        String birthday = contactBirthdayDatePicker.getJFormattedTextField().getText();
+    private void searchByNameButtonPressed(ActionEvent event) {
+        new SearchContactWorker(searchByNameTextField.getText(), SearchType.NAME, this).execute();
+    }
 
-        return new Contact.Builder()
-                .firstName(guiUtils.getNonEmptyTextOrNull(contactFirstNameTextField))
-                .surname(guiUtils.getNonEmptyTextOrNull(contactSurnameTextField))
-                .primaryEmail(guiUtils.getNonEmptyTextOrNull(contactPrimaryEmailTextField))
-                .birthday(birthday.equals("") ? null: LocalDate.parse(birthday))
-                .build();
+    private void searchByPhoneButtonPressed(ActionEvent event) {
+        String phone_part = searchByPhoneTextField.getText();
+
+        if (phone_part.equals("")) {
+            // Return all contacts by searching for empty string by name
+            new SearchContactWorker(phone_part, SearchType.NAME, this).execute();
+        } else {
+            new SearchContactWorker(phone_part, SearchType.PHONE, this).execute();
+        }
     }
 
     public void setContactsButtonsEnabled(boolean value) {
@@ -153,10 +159,6 @@ public class MainJFrame extends JFrame{
         contactBirthdayDatePicker.getModel().setValue(null);
     }
 
-    private void createUIComponents() {
-        contactBirthdayDatePicker = guiUtils.createDatePicker();
-    }
-
     public JPanel findContactsTab(Contact contact) {
         for (Component tab: contactsPane.getComponents()) {
             Long panelID = (Long) ((JPanel) tab).getClientProperty(DetailsFrame.FrameID);
@@ -168,4 +170,18 @@ public class MainJFrame extends JFrame{
         return null;
     }
 
+    private Contact getContactFromAddForm() {
+        String birthday = contactBirthdayDatePicker.getJFormattedTextField().getText();
+
+        return new Contact.Builder()
+                .firstName(guiUtils.getNonEmptyTextOrNull(contactFirstNameTextField))
+                .surname(guiUtils.getNonEmptyTextOrNull(contactSurnameTextField))
+                .primaryEmail(guiUtils.getNonEmptyTextOrNull(contactPrimaryEmailTextField))
+                .birthday(birthday.equals("") ? null: LocalDate.parse(birthday))
+                .build();
+    }
+
+    private void createUIComponents() {
+        contactBirthdayDatePicker = guiUtils.createDatePicker();
+    }
 }

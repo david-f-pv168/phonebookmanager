@@ -77,6 +77,10 @@ public class ContactsTableModel extends AbstractTableModel {
         fireTableRowsDeleted(lastRow, lastRow);
     }
 
+    public void removeAllContacts() {
+        contacts = new ArrayList<>();
+    }
+
     @Override
     public Class<?> getColumnClass(int columnIndex) {
         return Column.values()[columnIndex].type;
